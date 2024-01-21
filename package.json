@@ -19,26 +19,26 @@
     "vue": "^2.6.11",
     "vuetify": "^2.6.0",
     "vuex": "^3.4.0",
-    "webpack": "^4.46.0"
+    "webpack": "^5.89.0"
   },
   "netsuite": {
     "projectName": "run_scheduler",
     "suffixName": "tn_v2_vue"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.0.5",
-    "@vue/cli-plugin-eslint": "^4.0.5",
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-plugin-vuex": "^5.0.8",
-    "@vue/cli-service": "^4.0.5",
+    "@vue/cli-service": "^5.0.8",
     "babel-eslint": "^10.1.0",
     "base64-inline-loader": "^2.0.1",
     "compare-versions": "^3.5.0",
     "crypto": "1.0.1",
     "dotenv": "^16.0.3",
-    "eslint": "^6.7.2",
+    "eslint": "^7.5.0",
     "eslint-plugin-vue": "^6.2.2",
     "html-webpack-inline-source-plugin": "1.0.0-beta.2",
-    "html-webpack-plugin": "4.0.0-beta.4",
+    "html-webpack-plugin": "^5.1.0",
     "oauth-1.0a": "^2.2.6",
     "parse-imports": "^1.1.2",
     "sass": "~1.32.0",
