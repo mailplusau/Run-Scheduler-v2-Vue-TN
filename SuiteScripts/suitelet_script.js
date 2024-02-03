@@ -144,7 +144,58 @@ function _writeResponseJson(response, body) {
 }
 
 const getOperations = {
+    'getAllFranchisees' : function (response) {
+        let data = [];
 
+        NS_MODULES.search.create({
+            type: "partner",
+            filters:
+                [
+                    ["isinactive","is","F"],
+                    "AND",
+                    ["entityid","doesnotstartwith","Old"],
+                    "AND",
+                    ["custrecord_fr_agreement_franchisee.custrecord_fr_agreement_status","noneof","6"]
+                ],
+            columns:
+                [ 'internalid', 'entityid', 'companyname', 'department', 'location' ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            data.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, data);
+    },
+    'getPlansByFranchisee' : function (response, {partnerId}) {
+        let data = [];
+
+        NS_MODULES.search.create({
+            type: "customrecord_run_plan",
+            filters:
+                [
+                    ["custrecord_run_franchisee","is",partnerId],
+                ],
+            columns:
+                [ 'name', 'custrecord_run_franchisee', 'custrecord_run_operator' ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            data.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, data);
+    }
 }
 
 const postOperations = {
