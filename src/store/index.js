@@ -95,9 +95,14 @@ const actions = {
         getWindowContext().window['addShortcut']();
     },
     init : async context => {
-        if (!getWindowContext().location.href.includes(baseURL)) return;
+        // if (!getWindowContext().location.href.includes(baseURL)) return;
 
         await _readUrlParams(context);
+
+        context.dispatch('franchisees/init').then();
+        context.dispatch('run-plans/init').then();
+        context.dispatch('service-stops/init').then();
+        context.dispatch('customers/init').then();
     },
     handleException : (context, {title, message}) => {
         context.commit('displayErrorGlobalModal', {

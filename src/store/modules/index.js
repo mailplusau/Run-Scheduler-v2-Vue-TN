@@ -58,7 +58,7 @@ const root = { modules: {} };
             // Update `root.modules` with the latest definitions.
             updateModules();
             // Trigger a hot update in the store.
-            require('../../../../manga-desktop/src/router').default.hotUpdate({ modules: root.modules });
+            require('../../store').default.hotUpdate({ modules: root.modules });
         });
     }
 })();

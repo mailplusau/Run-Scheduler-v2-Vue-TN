@@ -18,7 +18,7 @@ const mutations = {
 
 const actions = {
     init : async context => {
-        await _getAllFranchisees(context);
+        await _getServicesByCustomerId(context);
     },
     setSelected : (context, id) => {
         context.commit('setSelected', id);
@@ -27,8 +27,8 @@ const actions = {
     }
 };
 
-async function _getAllFranchisees(context) {
-    context.state.data = await http.get('getAllFranchisees');
+async function _getServicesByCustomerId(context) {
+    context.state.data = await http.get('getServicesByCustomerId');
 }
 
 export default {
