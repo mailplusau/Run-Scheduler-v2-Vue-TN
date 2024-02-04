@@ -237,6 +237,83 @@ const getOperations = {
         });
 
         _writeResponseJson(response, data);
+    },
+    'getCustomersByFranchiseeId' : function (response, {partnerId}) {
+        let relatedServices = [];
+        let customers = [];
+
+        NS_MODULES.search.create({
+            type: "customer",
+            filters:
+                [
+                    ["partner", "is", partnerId],
+                ],
+            columns:
+                [ 'internalid', 'companyname' ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            customers.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, {customers, relatedServices});
+    },
+    'getServicesByCustomerId' : function (response, {customerId}) {
+        let data = [];
+
+        NS_MODULES.search.create({
+            type: "customrecord_service",
+            filters:
+                [
+                    ["custrecord_service_customer", "is", customerId],
+                ],
+            columns:
+                [
+                    "id",
+                    "name",
+                    "custrecord_service_day_adhoc",
+                    "custrecord_service_day_fri",
+                    "custrecord_service_day_mon",
+                    "custrecord_service_day_thu",
+                    "custrecord_service_day_tue",
+                    "custrecord_service_day_wed",
+                    "custrecord_service_gst",
+                    "custrecord_service",
+                    "custrecord_service_price",
+                    "custrecord_service_package",
+                    "custrecord_service_category",
+                    "custrecord_service_customer",
+                    "custrecord_service_franchisee",
+                    "custrecord_service_ns_item",
+                    "custrecord_service_comm_reg",
+                    "custrecord_service_description",
+                    "custrecord_service_day_freq_cycle",
+                    "custrecord_service_run_scheduled",
+                    "custrecord_service_prem_id",
+                    "custrecord_service_classification",
+                    "custrecord_service_delete_note",
+                    "custrecord_service_date_reviewed",
+                    "custrecord_service_date_last_price_upd",
+                    "custrecord_show_on_app",
+                    "custrecord_multiple_operators"
+                ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            data.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, data);
     }
 }
 
