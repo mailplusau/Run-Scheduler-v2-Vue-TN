@@ -172,7 +172,7 @@ const getOperations = {
 
         _writeResponseJson(response, data);
     },
-    'getPlansByFranchisee' : function (response, {partnerId}) {
+    'getPlansByFranchiseeId' : function (response, {partnerId}) {
         let data = [];
 
         NS_MODULES.search.create({
@@ -182,7 +182,49 @@ const getOperations = {
                     ["custrecord_run_franchisee","is",partnerId],
                 ],
             columns:
-                [ 'name', 'custrecord_run_franchisee', 'custrecord_run_operator' ]
+                [ 'internalid', 'name', 'custrecord_run_franchisee', 'custrecord_run_operator' ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            data.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, data);
+    },
+    'getServiceStopsByPlanId' : function (response, {planId}) {
+        let data = [];
+
+        NS_MODULES.search.create({
+            type: "customrecord_service_stop",
+            filters:
+                [
+                    ["custrecord_1288_plan","is",planId],
+                ],
+            columns:
+                [
+                    "custrecord_1288_customer",
+                    "custrecord_1288_service",
+                    "custrecord_1288_plan",
+                    "custrecord_1288_franchisee",
+                    "custrecord_1288_operator",
+                    "custrecord_1288_stop_name",
+                    "custrecord_1288_frequency",
+                    "custrecord_1288_frequency_cycle",
+                    "custrecord_1288_stop_times",
+                    "custrecord_1288_notes",
+                    "custrecord_1288_transfer_franchisee",
+                    "custrecord_1288_transfer_operator",
+                    "custrecord_1288_address_book",
+                    "custrecord_1288_postal_location",
+                    "custrecord_1288_manual_address",
+                    "custrecord_1288_relief_operator",
+                    "custrecord_1288_relief_end"
+                ]
         }).run().each(result => {
             let tmp = {};
             for (let column of result.columns) {
