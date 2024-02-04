@@ -50,3 +50,10 @@ export default {
     }
 };
 </script>
+
+<style>
+
+.smaller-cell-text-size {
+    font-size: 11px !important;
+}
+</style>

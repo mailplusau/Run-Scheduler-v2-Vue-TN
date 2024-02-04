@@ -13,6 +13,8 @@ const state = {
 
     standaloneMode: false,
 
+    route: 'calendar',
+
     globalModal: {
         open: false,
         title: 'Default title',
@@ -29,6 +31,8 @@ const state = {
 const getters = {
     pageTitle: state => state.pageTitle,
     globalModal: state => state.globalModal,
+
+    route: state => state.route,
 };
 
 const mutations = {
@@ -82,7 +86,8 @@ const mutations = {
 
         if (parent['setMPTheme'])
             parent.setMPTheme(title + ' - NetSuite Australia (Mail Plus Pty Ltd)')
-    }
+    },
+    setRoute: (state, route) => { state.route = route; }
 };
 
 const actions = {
