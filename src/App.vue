@@ -15,13 +15,8 @@
 
             <v-divider class="mb-3"></v-divider>
 
-            <v-container fluid>
-                <v-row justify="center">
-                    <v-col cols="12">
-                        Contents
-                    </v-col>
-                </v-row>
-            </v-container>
+            <CalendarView />
+            <CustomersView />
 
         </v-main>
 
@@ -31,11 +26,15 @@
 
 <script>
 import GlobalNotificationModal from "@/components/GlobalNotificationModal";
+import CalendarView from "@/views/calendar/Main.vue";
+import CustomersView from "@/views/customers/Main.vue";
 
 export default {
     name: 'App',
     components: {
         GlobalNotificationModal,
+        CalendarView,
+        CustomersView
     },
     beforeCreate() {
         this.$store.dispatch('init');

@@ -271,10 +271,12 @@ const getOperations = {
             filters:
                 [
                     ["custrecord_service_customer", "is", customerId],
+                    "AND",
+                    ["isinactive", "is", false],
                 ],
             columns:
                 [
-                    "id",
+                    "internalid",
                     "name",
                     "custrecord_service_day_adhoc",
                     "custrecord_service_day_fri",

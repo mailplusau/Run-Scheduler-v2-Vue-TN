@@ -4,12 +4,14 @@ const state = {
     data: [],
     selected: null,
     selectable: true,
+    loading: false,
 };
 
 const getters = {
-    all : state => state.data,
+    data : state => state.data,
     selected : state => state.selected,
     selectable : state => state.selectable,
+    loading : state => state.loading,
 };
 
 const mutations = {
@@ -18,6 +20,7 @@ const mutations = {
 
 const actions = {
     init : async context => {
+        console.log('init services')
         await _getServicesByCustomerId(context);
     },
     setSelected : (context, id) => {
@@ -28,7 +31,11 @@ const actions = {
 };
 
 async function _getServicesByCustomerId(context) {
-    context.state.data = await http.get('getServicesByCustomerId');
+    if (!context.rootGetters['customers/selected']) return;
+
+    context.state.loading = true;
+    context.state.data = await http.get('getServicesByCustomerId', {customerId: context.rootGetters['customers/selected']});
+    context.state.loading = false;
 }
 
 export default {

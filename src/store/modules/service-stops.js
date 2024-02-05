@@ -152,13 +152,17 @@ const state = {
         "custrecord_1288_manual_address",
         "custrecord_1288_relief_operator",
         "custrecord_1288_relief_end"
-    ]
+    ],
+    dialog: {
+        open: false,
+    }
 };
 
 state.data = testData;
 
 const getters = {
     data : state => state.data,
+    dialog : state => state.dialog,
     all : state => {
         let today = getDay(new Date());
 
