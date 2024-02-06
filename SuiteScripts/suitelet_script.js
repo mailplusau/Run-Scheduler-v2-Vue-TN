@@ -316,6 +316,56 @@ const getOperations = {
         });
 
         _writeResponseJson(response, data);
+    },
+    'getAllOperators' : function (response) {
+        let data = [];
+
+        NS_MODULES.search.create({
+            type: "customrecord_operator",
+            filters:
+                [
+                    ["isinactive","is","F"],
+                ],
+            columns:
+                [ 'internalid', 'name', 'custrecord_operator_franchisee', 'custrecord_operator_givennames', 'custrecord_operator_surname', 'custrecord_operator_phone', 'custrecord_operator_email' ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            data.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, data);
+    },
+    getOperatorsByFranchiseeId : function (response, {franchiseeId}) {
+        let data = [];
+
+        NS_MODULES.search.create({
+            type: "customrecord_operator",
+            filters:
+                [
+                    ["isinactive","is","F"],
+                    "AND",
+                    ["custrecord_operator_franchisee", "is", franchiseeId]
+                ],
+            columns:
+                [ 'internalid', 'name', 'custrecord_operator_franchisee', 'custrecord_operator_givennames', 'custrecord_operator_surname', 'custrecord_operator_phone', 'custrecord_operator_email' ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            data.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, data);
     }
 }
 
