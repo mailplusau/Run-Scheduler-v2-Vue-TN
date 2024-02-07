@@ -16,120 +16,46 @@
                     </v-toolbar-title>
                     <v-spacer></v-spacer>
 
-                    <v-btn outlined color="secondary" small dark
-                           @click.stop="$store.dispatch('service-stops/createNewServiceStopOfCurrentService')">
+                    <v-btn small @click="$store.commit('navigateBack')" color="white" light class="mr-2" outlined>
+                        <v-icon small>mdi-chevron-left</v-icon> go back
+                    </v-btn>
+                    <v-btn outlined color="secondary" small dark @click.stop="addNewStop">
                         Add New Stop
                     </v-btn>
                 </v-toolbar>
 
-                <v-timeline dense>
-                    <v-timeline-item v-for="(serviceStop, i) in serviceStops" :key="`serviceStop${i}`">
-                        {{serviceStop}}
+                <v-timeline dense align-top>
+                    <v-timeline-item v-if="!serviceStops.length" color="white" icon-color="red" small icon="mdi-exclamation-thick">
+                        <v-row justify="space-between" align="center">
+                            <v-col>No service stop to show.</v-col>
+                        </v-row>
                     </v-timeline-item>
+                    <v-timeline-item v-for="(serviceStop, i) in serviceStops" :key="`serviceStop${i}`"
+                                     class="mb-4" color="primary" icon-color="grey lighten-2" small>
 
-                    <v-timeline-item class="mb-4" color="red" icon-color="grey lighten-2" small>
-                        <v-row justify="space-between">
+                        <v-row justify="space-between" align="center">
+                            <v-col cols="8">
+                                <b class="primary--text">Service stop: {{serviceStop.custrecord_1288_stop_name}}</b><br>
+                                <span class="subtitle-2">
+                                    Address: {{$store.getters['addresses/getFormattedAddress'](parseInt(serviceStop.custrecord_1288_address_type), serviceStop)}}
+                                </span><br>
+                                <span class="caption grey--text lighten-1">
+                                    Notes:
+                                    <span v-if="serviceStop.custrecord_1288_notes">{{serviceStop.custrecord_1288_notes}}</span>
+                                    <i v-else>None provided</i>
+                                </span>
+                            </v-col>
                             <v-col cols="auto">
-                                This order was archived.
-                            </v-col>
-                            <v-col><v-btn>edit</v-btn></v-col>
-                            <v-col
-                                class="text-right"
-                                cols="auto"
-                            >
-                                15:26 EDT
+<!--                                <v-btn icon><v-icon>mdi-chevron-up-box-outline</v-icon></v-btn>-->
+<!--                                <v-btn icon><v-icon>mdi-chevron-down-box-outline</v-icon></v-btn>-->
+                                <v-btn color="primary" small @click="editServiceStop(serviceStop.internalid)">
+                                    <v-icon small class="mr-2">mdi-pencil</v-icon> Edit stop
+                                </v-btn>
+                                <v-btn icon color="red"><v-icon>mdi-delete</v-icon></v-btn>
                             </v-col>
                         </v-row>
                     </v-timeline-item>
 
-                    <v-timeline-item
-                        class="mb-4"
-                        small
-                    >
-                        <v-row justify="space-between">
-                            <v-col cols="7">
-                                <v-chip
-                                    class="white--text ml-0"
-                                    color="purple"
-                                    label
-                                    small
-                                >
-                                    APP
-                                </v-chip>
-                                Digital Downloads fulfilled 1 item.
-                            </v-col>
-                            <v-col
-                                class="text-right"
-                                cols="5"
-                            >
-                                15:25 EDT
-                            </v-col>
-                        </v-row>
-                    </v-timeline-item>
-
-                    <v-timeline-item
-                        class="mb-4"
-                        color="grey"
-                        small
-                    >
-                        <v-row justify="space-between">
-                            <v-col cols="7">
-                                Order confirmation email was sent to John Leider (john@vuetifyjs.com).
-                            </v-col>
-                            <v-col
-                                class="text-right"
-                                cols="5"
-                            >
-                                15:25 EDT
-                            </v-col>
-                        </v-row>
-                    </v-timeline-item>
-
-                    <v-timeline-item
-                        class="mb-4"
-                        hide-dot
-                    >
-                        <v-btn
-                            class="mx-0"
-                        >
-                            Resend Email
-                        </v-btn>
-                    </v-timeline-item>
-
-                    <v-timeline-item
-                        class="mb-4"
-                        color="grey"
-                        small
-                    >
-                        <v-row justify="space-between">
-                            <v-col cols="7">
-                                A $15.00 USD payment was processed on PayPal Express Checkout
-                            </v-col>
-                            <v-col
-                                class="text-right"
-                                cols="5"
-                            >
-                                15:25 EDT
-                            </v-col>
-                        </v-row>
-                    </v-timeline-item>
-
-                    <v-timeline-item
-                        color="grey"
-                        small
-                    >
-                        <v-row justify="space-between">
-                            <v-col cols="7">
-                                John Leider placed this order on Online Store (checkout #1937432132572).
-                            </v-col>
-                            <v-col
-                                class="text-right"
-                                cols="5"
-                            >
-                                15:25 EDT
-                            </v-col>
-                        </v-row>
-                    </v-timeline-item>
                 </v-timeline>
             </v-col>
 
@@ -140,16 +66,19 @@
             </v-col>
 
         </v-row>
+
+        <ServiceStopDialog />
     </PageWrapper>
 </template>
 
 <script>
 import PageWrapper from '@/components/core/PageWrapper.vue';
-import ServiceStopForm from '@/views/customers/components/ServiceStopForm.vue';
+import ServiceStopForm from '@/views/service-stops/components/ServiceStopForm.vue';
+import ServiceStopDialog from '@/views/service-stops/components/ServiceStopDialog.vue';
 
 export default {
     name: "Main",
-    components: {ServiceStopForm, PageWrapper},
+    components: {ServiceStopDialog, ServiceStopForm, PageWrapper},
     data: () => ({
         panel: undefined,
         table2data: [
@@ -181,10 +110,13 @@ export default {
     methods: {
         finishEditing() {
             this.panel = undefined;
-            this.$store.commit('setRoute', 'customers');
+            this.$store.commit('goToRoute', 'customers');
+        },
+        editServiceStop(serviceStopId) {
+            this.$store.dispatch('service-stops/editServiceStopOfCurrentService', serviceStopId);
         },
         addNewStop() {
-
+            this.$store.dispatch('service-stops/createNewServiceStopOfCurrentService');
         }
     },
     computed: {

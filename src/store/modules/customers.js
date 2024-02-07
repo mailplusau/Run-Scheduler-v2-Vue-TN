@@ -27,7 +27,6 @@ const mutations = {
 
 const actions = {
     init : async context => {
-        console.log('customers init');
         await _getCustomersByFranchiseeId(context);
     },
     setSelected : async (context, id) => {

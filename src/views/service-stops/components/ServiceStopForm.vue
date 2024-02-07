@@ -8,13 +8,6 @@ import AddressPicker from '@/views/customers/components/AddressPicker.vue';
 export default {
     name: "ServiceStopForm",
     components: {AddressPicker, OperatorPicker, EditableDateInput, EditableTimeInput},
-    created() {
-        console.log('form created')
-    },
-    mounted() {
-        console.log(this);
-        console.log('form mounted')
-    },
     data: () => ({
         dayArray: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         formValid: true,

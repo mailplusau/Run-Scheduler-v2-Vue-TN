@@ -254,7 +254,6 @@ const mutations = {
 
 const actions = {
     init : async context => {
-        console.log('init services')
         await _getServicesByCustomerId(context);
     },
     setSelected : async (context, id) => {

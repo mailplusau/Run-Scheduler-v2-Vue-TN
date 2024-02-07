@@ -55,24 +55,24 @@ export default {
             if (!this.$refs.form.validate()) return false;
 
             this.$store.commit('service-stops/saveAddress', {typeId: 1, data: JSON.stringify(this.manualForm)});
-            this.$store.dispatch('addresses/cacheAddressData', {typeId: 1, data: JSON.stringify(this.manualForm)})
-                .then(() => {this.$store.commit('addresses/resetPicker');});
+            this.$store.commit('addresses/addDataToCache', {typeId: 1, addressId: JSON.stringify(this.manualForm)});
+            this.$store.commit('addresses/resetPicker');
             this.dialog = false;
         },
         savePostalLocation() {
             if (!this.$refs.form.validate()) return false;
 
             this.$store.commit('service-stops/saveAddress', {typeId: 3, data: this.picker.postalLocationId});
-            this.$store.dispatch('addresses/cacheAddressData', {typeId: 3, addressId: this.picker.postalLocationId})
-                .then(() => {this.$store.commit('addresses/resetPicker');});
+            this.$store.commit('addresses/addDataToCache', {typeId: 3, addressId: JSON.stringify(this.manualForm)});
+            this.$store.commit('addresses/resetPicker');
             this.dialog = false;
         },
         saveCustomerAddress() {
             if (!this.$refs.form.validate()) return false;
 
             this.$store.commit('service-stops/saveAddress', {typeId: 2, data: this.picker.customerAddressId});
-            this.$store.dispatch('addresses/cacheAddressData', {typeId: 2, addressId: this.picker.customerAddressId, customerId: this.selectedCustomer.internalid})
-                .then(() => {this.$store.commit('addresses/resetPicker');});
+            this.$store.commit('addresses/addDataToCache', {typeId: 2, addressId: this.picker.customerAddressId, customerId: this.selectedCustomer.internalid});
+            this.$store.commit('addresses/resetPicker');
             this.dialog = false;
         }
     },

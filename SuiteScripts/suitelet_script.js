@@ -510,7 +510,7 @@ const postOperations = {
         let serviceStopRecord;
         let isoStringRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
-        if (serviceStopId) serviceStopRecord = record.load({type: 'customrecord_service_stop', serviceStopId, isDynamic: true});
+        if (serviceStopId) serviceStopRecord = record.load({type: 'customrecord_service_stop', id: serviceStopId, isDynamic: true});
         else serviceStopRecord = record.create({type: 'customrecord_service_stop'}); // id not present, this is new
 
         for (let fieldId of serviceStopColumns)

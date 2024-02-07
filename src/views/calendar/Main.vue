@@ -97,10 +97,12 @@ export default {
     methods: {
         async editServiceStop(serviceStop) {
             this.$store.commit('displayBusyGlobalModal', {title: 'Preparing', message: 'Please wait while we retrieve the information...'});
-            await this.$store.dispatch('customers/setSelected', serviceStop.custrecord_1288_customer);
-            await this.$store.dispatch('services/setSelected', serviceStop.custrecord_1288_service);
-            this.$store.commit('goToRoute', 'service-stops');
-            this.$store.commit('closeGlobalModal');
+            this.$nextTick(async () => {
+                await this.$store.dispatch('customers/setSelected', serviceStop.custrecord_1288_customer);
+                await this.$store.dispatch('services/setSelected', serviceStop.custrecord_1288_service);
+                this.$store.commit('goToRoute', 'service-stops');
+                this.$store.commit('closeGlobalModal');
+            })
         }
     },
     computed: {

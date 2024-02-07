@@ -50,9 +50,11 @@ const state = {
     },
 
     cache: {
+        queue: [],
         customerAddresses: {},
         postalLocations: {},
         tries: {},
+        running: false,
     }
 };
 
@@ -81,7 +83,7 @@ const getters = {
     getFormattedAddress : state => (typeId, addressData) => {
         let arr = ['custrecord_1288_manual_address', 'custrecord_1288_address_book', 'custrecord_1288_postal_location'];
         let addressId = addressData[arr[parseInt(typeId) - 1]] + '';
-        console.log('formatting address:', addressId, 'of type:', typeId);
+
         if (typeId === 1) {
             try {
                 let address = JSON.parse(addressId);
@@ -91,7 +93,9 @@ const getters = {
 
             if (!state.cache.customerAddresses[addressId + '']) {
                 Vue.set(state.cache.customerAddresses, addressId + '', 'Retrieving...');
-                _requestAddressDataFromSuitelet(state, typeId, addressId, addressData['custrecord_1288_customer']);
+                state.cache.queue.push({typeId, addressId, customerId: addressData['custrecord_1288_customer']});
+                _attemptToStarCacheBuilder();
+                // _requestAddressDataFromSuitelet(state, typeId, addressId, addressData['custrecord_1288_customer']);
             }
 
             return state.cache.customerAddresses[addressId]
@@ -100,7 +104,9 @@ const getters = {
 
             if (!state.cache.postalLocations[addressId + '']) {
                 Vue.set(state.cache.postalLocations, addressId + '', 'Retrieving...');
-                _requestAddressDataFromSuitelet(state, typeId, addressId, addressData['custrecord_1288_customer']);
+                state.cache.queue.push({typeId, addressId, customerId: addressData['custrecord_1288_customer']});
+                _attemptToStarCacheBuilder();
+                // _requestAddressDataFromSuitelet(state, typeId, addressId, addressData['custrecord_1288_customer']);
             }
 
             return state.cache.postalLocations[addressId]
@@ -115,13 +121,24 @@ const mutations = {
         state.picker.postalLocationId = null;
         state.picker.postalLocationLoading = false;
         state.picker.manualForm = {...manualAddressFormDefault}
+    },
+    addDataToCache : (state, {typeId, addressId, customerId}) => {
+        if (typeId === 2) {
+            let index = state.picker.customerAddresses.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+            if (index >= 0) Vue.set(state.cache.customerAddresses, addressId + '', _getCustomerAddressString(state.picker.customerAddresses[index]));
+            else state.cache.queue.push({typeId, addressId, customerId});
+        } else if (typeId === 3) {
+            let index = state.picker.postalLocations.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+            if (index >= 0) Vue.set(state.cache.postalLocations, addressId + '', _getPostalLocationString(state.picker.postalLocations[index]));
+            else state.cache.queue.push({typeId, addressId, customerId});
+        }
     }
 };
 
 const actions = {
     init : context => {
-        console.log('init');
         storeContext = context;
+        _attemptToStarCacheBuilder();
         _getCustomersAddresses(context).then();
     },
     setPickerAddressType : (context, typeId) => {
@@ -136,27 +153,43 @@ const actions = {
 
         context.state.picker.postalLocationLoading = false;
     },
-    cacheAddressData : async (context, {typeId, addressId, customerId}) => {
-        console.log('caching');
-        if (typeId === 2) {
-            let index = state.picker.customerAddresses.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+    cacheAddressData : async (context) => {
+        if (context.state.cache.running) return;
 
-            if (index >= 0) {
-                context.state.cache.customerAddresses[addressId + ''] = _getCustomerAddressString(state.picker.customerAddresses[index])
-            } else { // request from suitelet
-                let addressData = await http.get('getCustomerAddressById', {customerId, addressId});
-                context.state.cache.customerAddresses[addressId + ''] = _getCustomerAddressString(addressData)
-            }
-        } else if (typeId === 3) {
-            let index = state.picker.postalLocations.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+        context.state.cache.running = true;
 
-            if (index >= 0) {
-                context.state.cache.postalLocations[addressId + ''] = _getPostalLocationString(state.picker.postalLocations[index]);
-            } else { // request from suitelet
-                let addressData = await http.get('getPostalLocationById', {postalLocationId: addressId});
-                context.state.cache.postalLocations[addressId + ''] = _getPostalLocationString(addressData)
+        while(context.state.cache.queue.length) {
+            let {typeId, addressId, customerId} = context.state.cache.queue.shift();
+
+            try {
+                if (typeId === 2) {
+                    let index = context.state.picker.customerAddresses.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+
+                    if (index >= 0) {
+                        context.state.picker.customerAddresses[addressId + ''] = _getCustomerAddressString(context.state.picker.customerAddresses[index])
+                    } else { // request from suitelet
+                        let addressData = await http.get('getCustomerAddressById', {customerId, addressId});
+                        context.state.cache.customerAddresses[addressId + ''] = _getCustomerAddressString(addressData)
+                    }
+                } else if (typeId === 3) {
+                    let index = context.state.picker.postalLocations.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+
+                    if (index >= 0) {
+                        context.state.picker.postalLocations[addressId + ''] = _getPostalLocationString(context.state.picker.postalLocations[index]);
+                    } else { // request from suitelet
+                        let addressData = await http.get('getPostalLocationById', {postalLocationId: addressId});
+                        context.state.cache.postalLocations[addressId + ''] = _getPostalLocationString(addressData)
+                    }
+                }
+            } catch (e) {
+                console.log('Something went wrong when retrieving data for', {typeId, addressId, customerId}, '. Aborting', e);
             }
         }
+
+        context.state.cache.running = false;
+    },
+    test : () => {
+        return 'test string'
     }
 };
 
@@ -170,17 +203,8 @@ function _getCustomerAddressString(sAddr) {
     return `${sAddr.addr1} ${sAddr.addr2}, ${sAddr.city} ${sAddr.state} ${sAddr.zip} (${sAddr.custrecord_address_lat}, ${sAddr.custrecord_address_lon})`;
 }
 
-function _requestAddressDataFromSuitelet(state, typeId, addressId, customerId) {
-    if (storeContext) {
-        let key = typeId + '' + addressId;
-        if (!state.cache.tries[key]) {
-            Vue.set(state.cache.tries, key, 1)
-            storeContext.dispatch('addresses/cacheAddressData', {typeId, addressId, customerId}, {root: true});
-        } else if (state.cache.tries[key] < 10) {
-            state.cache.tries[key] += 1;
-            storeContext.dispatch('addresses/cacheAddressData', {typeId, addressId, customerId}, {root: true});
-        }
-    } else console.log('no storeContext')
+function _attemptToStarCacheBuilder() {
+    if (storeContext) storeContext.dispatch('addresses/cacheAddressData', null, {root: true});
 }
 
 function _getPostalLocationString(sAddr) {
