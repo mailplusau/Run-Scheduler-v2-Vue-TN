@@ -77,8 +77,6 @@ export default {
     }),
     methods: {
         handleRowClick(e, v) {
-            console.log(e);
-            console.log(v);
             this.selectedRow.splice(0, 1, v.item);
             this.$store.dispatch('customers/setSelected', v.item['internalid']);
         },

@@ -40,10 +40,8 @@ export default {
     }),
     methods: {
         handleServiceDetailClick(e, v) {
-            console.log(e);
-            console.log(v);
             this.$store.dispatch('services/setSelected', v.item.internalid);
-            this.$store.commit('setRoute', 'service-stops');
+            this.$store.commit('goToRoute', 'service-stops');
         },
     },
     computed: {

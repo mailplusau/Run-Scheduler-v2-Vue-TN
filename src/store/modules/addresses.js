@@ -86,7 +86,7 @@ const getters = {
             try {
                 let address = JSON.parse(addressId);
                 return `${address.addr1} ${address.addr2}, ${address.city} ${address.state} ${address.zip} (${address.lat}, ${address.lng})`
-            } catch (e) { return ''; }
+            } catch (e) { return addressId; }
         } else if (typeId === 2) {
 
             if (!state.cache.customerAddresses[addressId + '']) {
@@ -170,20 +170,6 @@ function _getCustomerAddressString(sAddr) {
     return `${sAddr.addr1} ${sAddr.addr2}, ${sAddr.city} ${sAddr.state} ${sAddr.zip} (${sAddr.custrecord_address_lat}, ${sAddr.custrecord_address_lon})`;
 }
 
-
-const debouncedAddItemToRequestQueue = debounce((state, typeId, addressId, customerId) => {
-    if (storeContext) {
-        let key = typeId + '' + addressId;
-        if (!state.cache.tries[key]) {
-            Vue.set(state.cache.tries, key, 1)
-            storeContext.dispatch('addresses/cacheAddressData', {typeId, addressId, customerId}, {root: true});
-        } else if (state.cache.tries[key] < 10) {
-            state.cache.tries[key] += 1;
-            storeContext.dispatch('addresses/cacheAddressData', {typeId, addressId, customerId}, {root: true});
-        }
-    }
-}, 1)
-
 function _requestAddressDataFromSuitelet(state, typeId, addressId, customerId) {
     if (storeContext) {
         let key = typeId + '' + addressId;
@@ -194,7 +180,7 @@ function _requestAddressDataFromSuitelet(state, typeId, addressId, customerId) {
             state.cache.tries[key] += 1;
             storeContext.dispatch('addresses/cacheAddressData', {typeId, addressId, customerId}, {root: true});
         }
-    }
+    } else console.log('no storeContext')
 }
 
 function _getPostalLocationString(sAddr) {

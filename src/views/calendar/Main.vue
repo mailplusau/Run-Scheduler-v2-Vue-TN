@@ -2,7 +2,7 @@
     <PageWrapper page-name="calendar">
         <v-row justify="center">
             <v-col cols="12">
-                <v-btn color="primary" @click="$store.commit('setRoute', 'customers')">
+                <v-btn color="primary" @click="$store.commit('goToRoute', 'customers')">
                     View Customer List
                 </v-btn>
             </v-col>
@@ -54,7 +54,7 @@
 
                                 <v-divider :key="`service-stop-divider-${index}-${innerIndex}`"></v-divider>
 
-                                <v-list-item :key="`service-stop-${index}-${innerIndex}`" @click="dialogOpen = true">
+                                <v-list-item :key="`service-stop-${index}-${innerIndex}`" @click="editServiceStop(serviceStop)">
                                     <v-list-item-action>
                                         <v-list-item-action-text class="black--text subtitle-2">
                                             {{ serviceStop.stopTime}} ({{ serviceStop.stopDuration }})
@@ -81,32 +81,12 @@
             </v-col>
         </v-row>
 
-
-        <v-dialog v-model="dialogOpen" scrollable>
-            <v-card class="background">
-                <v-toolbar color="primary" dark>
-                    <v-toolbar-title>
-                        Editing Stop
-                    </v-toolbar-title>
-                </v-toolbar>
-                <v-card-text style="height: 80vh;">
-                    <ServiceStopForm />
-                </v-card-text>
-
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn @click="dialogOpen = false">Cancel</v-btn>
-                    <v-btn @click="dialogOpen = false" color="green" dark>Save Changes</v-btn>
-                    <v-spacer></v-spacer>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
     </PageWrapper>
 </template>
 
 <script>
 import PageWrapper from '@/components/core/PageWrapper.vue';
-import ServiceStopForm from '@/views/customers/components/ServiceStopForm.vue';
+import ServiceStopForm from '@/views/service-stops/components/ServiceStopForm.vue';
 
 export default {
     name: "Main",
@@ -114,6 +94,15 @@ export default {
     data: () => ({
         dialogOpen: false,
     }),
+    methods: {
+        async editServiceStop(serviceStop) {
+            this.$store.commit('displayBusyGlobalModal', {title: 'Preparing', message: 'Please wait while we retrieve the information...'});
+            await this.$store.dispatch('customers/setSelected', serviceStop.custrecord_1288_customer);
+            await this.$store.dispatch('services/setSelected', serviceStop.custrecord_1288_service);
+            this.$store.commit('goToRoute', 'service-stops');
+            this.$store.commit('closeGlobalModal');
+        }
+    },
     computed: {
         serviceDays() {
             return this.$store.getters['service-stops/all'];

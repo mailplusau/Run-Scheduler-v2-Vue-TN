@@ -2,7 +2,7 @@
     <PageWrapper page-name="customers">
         <v-row justify="center">
             <v-col cols="12">
-                <v-btn color="primary" @click="$store.commit('setRoute', 'calendar')">
+                <v-btn color="primary" @click="$store.commit('goToRoute', 'calendar')">
                     View Calendar
                 </v-btn>
             </v-col>

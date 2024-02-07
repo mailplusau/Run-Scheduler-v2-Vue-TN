@@ -257,9 +257,9 @@ const actions = {
         console.log('init services')
         await _getServicesByCustomerId(context);
     },
-    setSelected : (context, id) => {
+    setSelected : async (context, id) => {
         context.commit('setSelected', id);
-        context.dispatch('service-stops/getDataBySelectedService', null, {root: true}).then();
+        await context.dispatch('service-stops/getDataBySelectedService', null, {root: true});
     }
 };
 

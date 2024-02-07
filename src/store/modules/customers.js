@@ -30,11 +30,12 @@ const actions = {
         console.log('customers init');
         await _getCustomersByFranchiseeId(context);
     },
-    setSelected : (context, id) => {
+    setSelected : async (context, id) => {
         context.commit('setSelected', id);
-        console.log('customer selected. init services...');
-        context.dispatch('services/init', null, {root: true}).then();
-        context.dispatch('addresses/init', null, {root: true}).then();
+        await Promise.allSettled([
+            context.dispatch('services/init', null, {root: true}),
+            context.dispatch('addresses/init', null, {root: true})
+        ])
     }
 };
 

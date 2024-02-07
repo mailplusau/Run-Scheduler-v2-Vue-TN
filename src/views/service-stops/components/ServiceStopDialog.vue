@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import ServiceStopForm from '@/views/customers/components/ServiceStopForm.vue';
+import ServiceStopForm from '@/views/service-stops/components/ServiceStopForm.vue';
 
 export default {
     name: "ServiceStopDialog",
