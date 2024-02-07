@@ -8,6 +8,8 @@ const baseURL = 'https://' + process.env.VUE_APP_NS_REALM + '.app.netsuite.com';
 
 Vue.use(Vuex)
 
+const routeList = [];
+
 const state = {
     pageTitle: VARS.pageTitle,
 
@@ -87,7 +89,12 @@ const mutations = {
         if (parent['setMPTheme'])
             parent.setMPTheme(title + ' - NetSuite Australia (Mail Plus Pty Ltd)')
     },
-    setRoute: (state, route) => { state.route = route; }
+
+    goToRoute: (state, route) => {
+        routeList.push(state.route);
+        state.route = route;
+    },
+    navigateBack : state => { if (routeList.length) state.route = routeList.pop(); }
 };
 
 const actions = {
