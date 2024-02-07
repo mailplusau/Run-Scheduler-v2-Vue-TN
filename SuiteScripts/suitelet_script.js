@@ -13,6 +13,10 @@ let htmlTemplateFilename/**/;
 let clientScriptFilename/**/;
 
 const defaultTitle = VARS.pageTitle;
+const serviceStopColumns = Object.keys(VARS.serviceStopDefault);
+const addressFieldIds = VARS.addressFieldIds;
+const addressSublistFieldIds = VARS.addressSublistFieldIds;
+const postalLocationFieldIds = VARS.postalLocationFieldIds;
 
 let NS_MODULES = {};
 
@@ -144,6 +148,20 @@ function _writeResponseJson(response, body) {
 }
 
 const getOperations = {
+    'getSelectOptions' : function (response, {id, type, valueColumnName, textColumnName}) {
+        let {search} = NS_MODULES;
+        let data = [];
+
+        search.create({
+            id, type,
+            columns: [{name: valueColumnName}, {name: textColumnName}]
+        }).run().each(result => {
+            data.push({value: result.getValue(valueColumnName), text: result.getValue(textColumnName)});
+            return true;
+        });
+
+        _writeResponseJson(response, data);
+    },
     'getAllFranchisees' : function (response) {
         let data = [];
 
@@ -205,26 +223,30 @@ const getOperations = {
                 [
                     ["custrecord_1288_plan","is",planId],
                 ],
-            columns:
+            columns: serviceStopColumns
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            data.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, data);
+    },
+    'getServiceStopsByServiceId' : function (response, {serviceId}) {
+        let data = [];
+
+        NS_MODULES.search.create({
+            type: "customrecord_service_stop",
+            filters:
                 [
-                    "custrecord_1288_customer",
-                    "custrecord_1288_service",
-                    "custrecord_1288_plan",
-                    "custrecord_1288_franchisee",
-                    "custrecord_1288_operator",
-                    "custrecord_1288_stop_name",
-                    "custrecord_1288_frequency",
-                    "custrecord_1288_frequency_cycle",
-                    "custrecord_1288_stop_times",
-                    "custrecord_1288_notes",
-                    "custrecord_1288_transfer_franchisee",
-                    "custrecord_1288_transfer_operator",
-                    "custrecord_1288_address_book",
-                    "custrecord_1288_postal_location",
-                    "custrecord_1288_manual_address",
-                    "custrecord_1288_relief_operator",
-                    "custrecord_1288_relief_end"
-                ]
+                    ["custrecord_1288_service", "is", serviceId],
+                ],
+            columns: serviceStopColumns
         }).run().each(result => {
             let tmp = {};
             for (let column of result.columns) {
@@ -249,7 +271,7 @@ const getOperations = {
                     ["partner", "is", partnerId],
                 ],
             columns:
-                [ 'internalid', 'companyname' ]
+                [ 'internalid', 'entityid', 'companyname' ]
         }).run().each(result => {
             let tmp = {};
             for (let column of result.columns) {
@@ -341,7 +363,7 @@ const getOperations = {
 
         _writeResponseJson(response, data);
     },
-    getOperatorsByFranchiseeId : function (response, {franchiseeId}) {
+    'getOperatorsByFranchiseeId' : function (response, {franchiseeId}) {
         let data = [];
 
         NS_MODULES.search.create({
@@ -366,9 +388,140 @@ const getOperations = {
         });
 
         _writeResponseJson(response, data);
+    },
+    'getCustomerAddresses' : function (response, {customerId}) {
+        let {record} = NS_MODULES;
+        let data = [];
+
+        if (!customerId) return _writeResponseJson(response, {error: `Invalid Customer ID: ${customerId}`});
+
+        let customerRecord = record.load({
+            type: record.Type.CUSTOMER,
+            id: customerId,
+            isDynamic: true
+        });
+
+        let lineCount = customerRecord.getLineCount({sublistId: 'addressbook'});
+
+        for (let line = 0; line < lineCount; line++) {
+            customerRecord.selectLine({sublistId: 'addressbook', line});
+            let entry = {};
+
+            for (let fieldId of addressSublistFieldIds) {
+                entry[fieldId] = customerRecord.getCurrentSublistValue({sublistId: 'addressbook', fieldId})
+            }
+
+            let addressSubrecord = customerRecord.getCurrentSublistSubrecord({sublistId: 'addressbook', fieldId: 'addressbookaddress'});
+            for (let fieldId of addressFieldIds) {
+                entry[fieldId] = addressSubrecord.getValue({ fieldId })
+            }
+            entry['fullAddress'] = `${addressSubrecord.getValue({ fieldId: 'addr1' })} ${addressSubrecord.getValue({ fieldId: 'addr2' })}, ${addressSubrecord.getValue({ fieldId: 'city' })} ${addressSubrecord.getValue({ fieldId: 'state' })} ${addressSubrecord.getValue({ fieldId: 'zip' })}`
+
+            data.push(entry);
+        }
+
+        _writeResponseJson(response, data);
+    },
+    'getPostalLocationOptions' : function (response, {postalStateId}) {
+        let {search} = NS_MODULES;
+        let data = [];
+
+        let NCLSearch = search.load({
+            type: 'customrecord_ap_lodgment_location',
+            id: 'customsearch_smc_noncust_location'
+        });
+
+        //NCL Type: AusPost(1), Toll(2), StarTrack(7)
+        NCLSearch.filters.push(search.createFilter({
+            name: 'custrecord_noncust_location_type',
+            operator: search.Operator.ANYOF,
+            values: [1, 2, 7]
+        }))
+
+        NCLSearch.filters.push(search.createFilter({
+            name: 'custrecord_ap_lodgement_site_state',
+            operator: search.Operator.IS,
+            values: postalStateId,
+        }))
+
+        let results = NCLSearch.run();
+
+        let temp = 0;
+        while (temp < 5) {
+            let subset = results.getRange({start: temp * 1000, end: temp * 1000 + 1000});
+            for (let postalLocation of subset) { // we can also use getAllValues() on one of these to see all available fields
+                let entry = {};
+                for (let fieldId of postalLocationFieldIds) {
+                    if (['custrecord_noncust_location_type', 'custrecord_ap_lodgement_site_state'].includes(fieldId)) {
+                        entry[fieldId] = postalLocation.getText({name: fieldId});
+                    } else entry[fieldId] = postalLocation.getValue({name: fieldId});
+                }
+                data.push(entry);
+            }
+            if (subset.length < 1000) break;
+            temp++;
+        }
+
+        _writeResponseJson(response, data);
+    },
+    'getFrequencyCycle' : function (response) {
+        //customlist_freq_cycle
+    },
+    'getCustomerAddressById' : function (response, {customerId, addressId}) {
+        let {record} = NS_MODULES;
+
+        let customerRecord = record.load({
+            type: record.Type.CUSTOMER,
+            id: customerId,
+            isDynamic: true
+        });
+
+        let line = customerRecord.findSublistLineWithValue({sublistId: 'addressbook', fieldId: 'internalid', value: addressId});
+
+        let entry = {};
+        customerRecord.selectLine({sublistId: 'addressbook', line});
+
+        for (let fieldId of addressSublistFieldIds)
+            entry[fieldId] = customerRecord.getCurrentSublistValue({sublistId: 'addressbook', fieldId})
+
+        let addressSubrecord = customerRecord.getCurrentSublistSubrecord({sublistId: 'addressbook', fieldId: 'addressbookaddress'});
+
+        for (let fieldId of addressFieldIds)
+            entry[fieldId] = addressSubrecord.getValue({ fieldId })
+
+        _writeResponseJson(response, entry);
+    },
+    'getPostalLocationById' : function (response, {postalLocationId}) {
+        let postalLocationRecord = NS_MODULES.record.load({type: 'customrecord_ap_lodgment_location', id: postalLocationId});
+
+        let entry = {};
+        for (let fieldId of postalLocationFieldIds) {
+            if (['custrecord_noncust_location_type', 'custrecord_ap_lodgement_site_state'].includes(fieldId)) {
+                entry[fieldId] = postalLocationRecord.getText({fieldId});
+            } else entry[fieldId] = postalLocationRecord.getValue({fieldId});
+        }
+        _writeResponseJson(response, entry);
     }
 }
 
 const postOperations = {
+    'saveServiceStop' : function (response, {serviceStopId, serviceStopData}) {
+        let {record} = NS_MODULES;
+        let serviceStopRecord;
+        let isoStringRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
+        if (serviceStopId) serviceStopRecord = record.load({type: 'customrecord_service_stop', serviceStopId, isDynamic: true});
+        else serviceStopRecord = record.create({type: 'customrecord_service_stop'}); // id not present, this is new
+
+        for (let fieldId of serviceStopColumns)
+            if (fieldId.toLowerCase() !== 'internalid')
+                serviceStopRecord.setValue({
+                    fieldId,
+                    value: isoStringRegex.test(serviceStopData[fieldId]) ? new Date(serviceStopData[fieldId]) : serviceStopData[fieldId]
+                });
+
+        serviceStopId = serviceStopRecord.save({ignoreMandatoryFields: true});
+
+        _writeResponseJson(response, serviceStopId);
+    }
 };

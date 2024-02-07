@@ -7,7 +7,7 @@
 
         <template v-slot:top>
             <v-toolbar flat dense color="primary" dark>
-                <v-toolbar-title v-if="customer" class="subtitle-1 yellow--text">Service Details of {{customer.companyname}}</v-toolbar-title>
+                <v-toolbar-title v-if="customer.companyname" class="subtitle-1 yellow--text">Services of {{customer.companyname}}</v-toolbar-title>
                 <v-toolbar-title  v-else class="subtitle-2 grey--text">No customer selected</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-toolbar-title class="caption yellow--text">
@@ -19,10 +19,10 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-            <v-btn icon color="primary" title="Edit stop" @click.stop="serviceStopDialog = true"><v-icon>mdi-pencil</v-icon></v-btn>
+<!--            <v-btn icon color="primary" title="Edit stop" @click.stop="handleServiceDetailClick"><v-icon>mdi-pencil</v-icon></v-btn>-->
             <v-btn icon color="red" title="Delete stop" @click.stop=""><v-icon>mdi-delete</v-icon></v-btn>
             <v-btn icon color="" title="Inactivate stop" @click.stop=""><v-icon>mdi-pause-box-outline</v-icon></v-btn>
-            <v-btn icon color="" title="Reactivate stop" @click.stop=""><v-icon>mdi-play-box-outline</v-icon></v-btn>
+<!--            <v-btn icon color="" title="Reactivate stop" @click.stop=""><v-icon>mdi-play-box-outline</v-icon></v-btn>-->
         </template>
     </v-data-table>
 </template>
@@ -42,7 +42,8 @@ export default {
         handleServiceDetailClick(e, v) {
             console.log(e);
             console.log(v);
-            this.serviceStopDialog = true
+            this.$store.dispatch('services/setSelected', v.item.internalid);
+            this.$store.commit('setRoute', 'service-stops');
         },
     },
     computed: {
@@ -51,14 +52,6 @@ export default {
         },
         services() {
             return this.$store.getters['services/data'];
-        },
-        serviceStopDialog: {
-            get() {
-                return this.$store.getters['service-stops/dialog'].open;
-            },
-            set(val) {
-                this.$store.getters['service-stops/dialog'].open = val;
-            }
         },
         loading() {
             return this.$store.getters['services/loading'];

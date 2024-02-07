@@ -4,9 +4,9 @@
 
         <template v-slot:activator="{ on, attrs }">
             <v-text-field ref="dateInput" v-model="enteredDate" :prefix="prefix" :label="label" :hint="hint" dense
-                          class="editable-date-input"
+                          class="editable-date-input" outlined
                           persistent-hint prepend-icon="mdi-calendar" v-bind="attrs" v-on="on"
-                          :rules="[validateEnteredDate]"
+                          :rules="[validateEnteredDate, ...rules]"
                           @blur="handleEnterOnDatePicker"
                           @keyup.enter="handleEnterOnDatePicker"
             ></v-text-field>
@@ -54,6 +54,11 @@ export default {
             default: new Date().toISOString().substring(0, 10),
             required: true,
         },
+        rules: {
+            type: Array,
+            default: () => ([]),
+            required: false,
+        }
     },
     data: (vm) => ({
         dateMenu: false,
@@ -111,6 +116,6 @@ export default {
 
 <style>
 div.editable-date-input div.v-text-field__prefix {
-    font-weight: 600;
+    //font-weight: 600;
 }
 </style>

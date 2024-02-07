@@ -11,6 +11,11 @@ const getters = {
     all : state => state.data,
     selected : state => state.selected,
     selectable : state => state.selectable,
+
+    selectedItem : state => {
+        let i = state.data.findIndex(item => item.internalid === state.selected);
+        return i >= 0 ? state.data[i] : null;
+    },
     loading : state => state.loading,
 };
 

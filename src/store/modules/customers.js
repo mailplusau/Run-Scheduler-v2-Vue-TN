@@ -17,7 +17,7 @@ const getters = {
     selectedItem : state => {
         let index = state.data.findIndex(item => item['internalid'] === state.selected);
 
-        return index >= 0 ? state.data[index] : null;
+        return index >= 0 ? state.data[index] : {};
     }
 };
 
@@ -34,6 +34,7 @@ const actions = {
         context.commit('setSelected', id);
         console.log('customer selected. init services...');
         context.dispatch('services/init', null, {root: true}).then();
+        context.dispatch('addresses/init', null, {root: true}).then();
     }
 };
 

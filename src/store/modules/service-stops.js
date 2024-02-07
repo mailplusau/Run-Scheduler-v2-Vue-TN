@@ -1,5 +1,6 @@
 import { getDay, addDays, format } from 'date-fns';
 import http from '@/utils/http';
+import {VARS} from '@/utils/utils.mjs';
 
 const SERVICE_STOP_SCHEMA = {
     internalId: Number,
@@ -42,7 +43,6 @@ const SERVICE_STOP_SCHEMA = {
     temporaryOperatorId: Number,
     temporaryPeriod: Date, // Date time period during which this operator should be used
 
-    // TODO: scenario of secondary operator for a temporary period of time.
     // TODO: this is related to invoice
     // TODO: job gets created everyday based on this record
     // TODO:
@@ -50,120 +50,79 @@ const SERVICE_STOP_SCHEMA = {
 
 const testData = [
     {
-        stopName: 'BANKSTOWN GPO POST SHOP',
-
-        frequency: '1,0,0,0,1,0',
-        sequence: 0,
-        notes: '',
-
-        time: '6:00 AM - 6:30 AM',
-
-        address: {
-            addr1: '',
-            addr2: '50 Marion Street',
-            city: 'Sydney',
-            state: 'NSW',
-            zip: '2200',
-            country: 'AU',
-            lat: 100,
-            lng: 200,
-        }
-    },
-    {
-        stopName: 'ALEXANDRIA BUSINESS HUB',
-
-        frequency: '1,0,1,0,0,0',
-        sequence: 0,
-        notes: '',
-
-        time: '3:30 PM - 4:00 PM',
-
-        address: {
-            addr1: 'Unit 16',
-            addr2: '175 Pitt Street',
-            city: 'Sydney',
-            state: 'NSW',
-            zip: '2000',
-            country: 'AU',
-            lat: 100,
-            lng: 200,
-        }
-    },
-    {
-        stopName: 'Test Customer 1',
-
-        frequency: '1,0,1,0,0,0',
-        sequence: 1,
-        notes: '',
-
-        time: '6:30 PM - 7:00 PM',
-
-        address: {
-            addr1: '',
-            addr2: '19 Martin Place',
-            city: 'Sydney',
-            state: 'NSW',
-            zip: '2000',
-            country: 'AU',
-            lat: 100,
-            lng: 200,
-        }
-    },
-    {
-        stopName: 'SYDNEY GPO POST SHOP',
-
-        frequency: '0,0,1,1,1,0',
-        sequence: 0,
-        notes: '',
-
-        time: '3:30 AM - 4:00 AM',
-
-        address: {
-            addr1: '',
-            addr2: '66 Hunter Street',
-            city: 'Sydney',
-            state: 'NSW',
-            zip: '2000',
-            country: 'AU',
-            lat: 100,
-            lng: 200,
-        }
-    },
-
+        "internalid": "1",
+        "internalid_text": "1",
+        "custrecord_1288_customer": "630600",
+        "custrecord_1288_customer_text": "71165273 Test NSW Customer 01",
+        "custrecord_1288_service": "88530",
+        "custrecord_1288_service_text": "AMPO",
+        "custrecord_1288_plan": "258",
+        "custrecord_1288_plan_text": "Test Tim",
+        "custrecord_1288_franchisee": "779884",
+        "custrecord_1288_franchisee_text": "TEST - NSW",
+        "custrecord_1288_operator": "",
+        "custrecord_1288_operator_text": "",
+        "custrecord_1288_stop_name": "Test",
+        "custrecord_1288_stop_name_text": null,
+        "custrecord_1288_frequency": "1,1,1,1,1,0",
+        "custrecord_1288_frequency_text": null,
+        "custrecord_1288_frequency_cycle": "5",
+        "custrecord_1288_frequency_cycle_text": "Date Specific",
+        "custrecord_1288_stop_times": "7:00|600,7:00|600,7:00|600,7:00|600,7:00|600,7:00|600",
+        "custrecord_1288_stop_times_text": null,
+        "custrecord_1288_notes": "",
+        "custrecord_1288_notes_text": null,
+        "custrecord_1288_sequence": "0",
+        "custrecord_1288_sequence_text": null,
+        "custrecord_1288_is_transfer": "2",
+        "custrecord_1288_is_transfer_text": "No",
+        "custrecord_1288_transfer_franchisee": "",
+        "custrecord_1288_transfer_franchisee_text": "",
+        "custrecord_1288_transfer_operator": "",
+        "custrecord_1288_transfer_operator_text": "",
+        "custrecord_1288_address_type": "2",
+        "custrecord_1288_address_type_text": null,
+        "custrecord_1288_address_book": "123/345",
+        "custrecord_1288_address_book_text": "",
+        "custrecord_1288_postal_location": "",
+        "custrecord_1288_postal_location_text": "",
+        "custrecord_1288_manual_address": "{\"addr1\":\"\",\"addr2\":\"33 Rose Ln \",\"city\":\"Melbourne\",\"state\":\"VIC\",\"zip\":\"3000\",\"country\":\"AU\",\"lat\":-37.81500010000001,\"lng\":144.9538708}",
+        "custrecord_1288_manual_address_text": null,
+        "custrecord_1288_relief_operator": "",
+        "custrecord_1288_relief_operator_text": "",
+        "custrecord_1288_relief_start": "1/1/2024 12:00:00 AM",
+        "custrecord_1288_relief_start_text": null,
+        "custrecord_1288_relief_end": "1/1/2024 11:59:59 PM",
+        "custrecord_1288_relief_end_text": null
+    }
 ]
 
 const state = {
     data: [],
-    schema: [
-        "custrecord_1288_customer",
-        "custrecord_1288_service",
-        "custrecord_1288_plan",
-        "custrecord_1288_franchisee",
-        "custrecord_1288_operator",
-        "custrecord_1288_stop_name",
-        "custrecord_1288_frequency",
-        "custrecord_1288_frequency_cycle",
-        "custrecord_1288_stop_times",
-        "custrecord_1288_notes",
-        "custrecord_1288_transfer_franchisee",
-        "custrecord_1288_transfer_operator",
-        "custrecord_1288_address_book",
-        "custrecord_1288_postal_location",
-        "custrecord_1288_manual_address",
-        "custrecord_1288_relief_operator",
-        "custrecord_1288_relief_end"
-    ],
-    dialog: {
+    ofWeek: {
+        data: [],
+        loading: false,
+    },
+    ofCurrentService: {
+        data: [],
+        loading: false,
+    },
+    formDialog: {
+        form: {},
         open: false,
-    }
+    },
+
 };
 
-state.data = testData;
+// state.data = testData;
+state.formDialog.form = {...VARS.serviceStopDefault};
 
 const getters = {
+    fieldNameByAddressType : state => typeId => ['custrecord_1288_manual_address', 'custrecord_1288_address_book', 'custrecord_1288_postal_location'][parseInt(typeId) - 1],
     data : state => state.data,
-    dialog : state => state.dialog,
-    all : state => {
+    ofCurrentService : state => state.ofCurrentService,
+    formDialog : state => state.formDialog,
+    all : (state, getters, rootState, rootGetters) => {
         let today = getDay(new Date());
 
         let obj = [
@@ -176,15 +135,21 @@ const getters = {
         ]
 
         state.data.forEach(stop => {
-            let daysOfWeek = stop.frequency.split(',');
-            let stopTimePerDay = stop.time.split(',');
+            let daysOfWeek = stop.custrecord_1288_frequency.split(',');
+            let stopTimePerDay = stop.custrecord_1288_stop_times.split(',');
 
             for (const [index, value] of daysOfWeek.entries()) {
-                if (value === '1')
+                if (value === '1') {
+                    let [stopTime, stopDuration] = stopTimePerDay[index].split('|');
+                    let addressTypes = ['Manually Entered', 'Address Book', 'Postal Location']
+
                     obj[index].stops.push({
                         ...stop,
-                        time: stopTimePerDay[index] || stopTimePerDay[0] || 'Not Set'
-                    })
+                        stopTime, stopDuration,
+                        address: rootGetters['addresses/getFormattedAddress'](parseInt(stop.custrecord_1288_address_type), stop),
+                        addressType: addressTypes[parseInt(stop.custrecord_1288_address_type) - 1]
+                    });
+                }
             }
         })
 
@@ -201,17 +166,85 @@ const getters = {
 };
 
 const mutations = {
-
+    editServiceStopOfCurrentServiceByIndex : (state, index) => {
+        if (!state.ofCurrentService.data[index]) return;
+        state.formDialog.form = {...state.ofCurrentService.data[index]};
+        state.formDialog.open = true;
+    },
+    closeFormDialog : state => {
+        state.formDialog.open = false;
+    },
+    saveAddress : (state, {typeId, data}) => {
+        let arr = ['custrecord_1288_manual_address', 'custrecord_1288_address_book', 'custrecord_1288_postal_location'];
+        state.formDialog.form.custrecord_1288_address_type = typeId;
+        state.formDialog.form[arr[typeId - 1]] = data;
+    }
 };
 
 const actions = {
     init : async context => {
         console.log('service-stops init');
-        await _getServiceStopsByPlanId(context);
+        await _getServiceStopsBySelectedPlan(context);
     },
+    getDataBySelectedService : async context => {
+        if (!context.rootGetters['services/selected']) return;
+
+        context.state.ofCurrentService.loading = true;
+        context.state.ofCurrentService.data = await http.get('getServiceStopsByServiceId', {serviceId: context.rootGetters['services/selected']});
+        context.state.ofCurrentService.loading = false;
+    },
+
+    createNewServiceStopOfCurrentService : context => {
+        context.state.formDialog.form = {...VARS.serviceStopDefault};
+
+        // TODO: prefill data here
+        console.log('createNewServiceStopOfCurrentService pre-fill')
+        if (context.rootGetters['services/selectedItem']) {
+            let service = context.rootGetters['services/selectedItem'];
+            let terms = ['mon', 'tue', 'wed', 'thu', 'fri', 'adhoc'];
+
+            context.state.formDialog.form.custrecord_1288_customer = context.rootGetters['customers/selected'];
+            context.state.formDialog.form.custrecord_1288_service = context.rootGetters['services/selected'];
+            context.state.formDialog.form.custrecord_1288_plan = context.rootGetters['run-plans/selected'];
+            context.state.formDialog.form.custrecord_1288_franchisee = context.rootGetters['franchisees/selected'];
+            context.state.formDialog.form.custrecord_1288_operator = context.rootGetters['run-plans/selectedItem']?.custrecord_run_operator || null;
+
+            // pre-fill frequency, service time and stop duration
+            context.state.formDialog.form.custrecord_1288_frequency = terms.map(term => !!service[`custrecord_service_day_${term}`] ? 1 : 0).join(',');
+            context.state.formDialog.form.custrecord_1288_stop_times = terms.map(() => '07:00|600').join(',');
+
+        }
+
+        context.state.formDialog.open = true;
+    },
+    save : async context => {
+        context.commit('displayBusyGlobalModal', {title: 'Processing', message: 'Saving service stop. Please wait...'}, {root: true});
+
+        let serviceStopData = JSON.parse(JSON.stringify(context.state.formDialog.form));
+
+        // Data preparation
+        serviceStopData.custrecord_1288_relief_start = new Date(serviceStopData.custrecord_1288_relief_start + ' 00:00:00');
+        serviceStopData.custrecord_1288_relief_end = new Date(serviceStopData.custrecord_1288_relief_end + ' 23:59:59');
+
+        await http.post('saveServiceStop', {
+            serviceStopId: context.state.formDialog.form.internalid,
+            serviceStopData
+        });
+
+        await context.dispatch('getDataBySelectedService');
+
+        console.log(serviceStopData);
+
+        context.state.formDialog.open = false;
+
+        context.commit('displayInfoGlobalModal', {
+            title: 'Complete',
+            message: serviceStopData.internalid ? 'Service stop has been saved' : 'A new service stop has been created'
+        }, {root: true});
+    }
 };
 
-async function _getServiceStopsByPlanId(context) {
+async function _getServiceStopsBySelectedPlan(context) {
     if (!context.rootGetters['run-plans/selected']) return;
 
     context.state.data = await http.get('getServiceStopsByPlanId', {planId: context.rootGetters['run-plans/selected']});

@@ -99,10 +99,15 @@ const actions = {
 
         await _readUrlParams(context);
 
-        context.dispatch('franchisees/init').then();
-        context.dispatch('run-plans/init').then();
+        await Promise.allSettled([
+            context.dispatch('addresses/init'),
+            context.dispatch('franchisees/init'),
+            context.dispatch('run-plans/init'),
+            context.dispatch('customers/init'),
+            context.dispatch('misc/init'),
+        ])
+
         context.dispatch('service-stops/init').then();
-        context.dispatch('customers/init').then();
     },
     handleException : (context, {title, message}) => {
         context.commit('displayErrorGlobalModal', {

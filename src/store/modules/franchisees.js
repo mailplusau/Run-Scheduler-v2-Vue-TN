@@ -24,11 +24,12 @@ const actions = {
         context.commit('setSelected', id);
         context.dispatch('run-plans/init', null, {root: true}).then();
         context.dispatch('customers/init', null, {root: true}).then();
+        context.dispatch('operators/setFranchiseeForPicker', id, {root: true}).then();
     }
 };
 
 async function _getAllFranchisees(context) {
-    context.state.data = await http.get('getAllFranchisees');
+    context.state.data = await http.get('getAllFranchisees') || [];
 }
 
 export default {

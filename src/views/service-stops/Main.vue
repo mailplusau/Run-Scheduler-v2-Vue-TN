@@ -3,64 +3,138 @@
         <v-row justify="center">
 
             <v-col cols="12">
-                <v-toolbar flat dense color="primary" dark>
-                    <v-toolbar-title class="subtitle-1">
-                        Stops under service <b class="yellow--text">AMPO ($9.00)</b>
-                    </v-toolbar-title>
-                    <v-divider class="mx-4" inset vertical></v-divider>
-                    <v-toolbar-title class="caption yellow--text">
-                        {{ '100009 TEST - Brighton Le Sands Public School' }}
-                    </v-toolbar-title>
-                    <v-spacer></v-spacer>
-
-                    <v-btn outlined color="secondary" small dark :disabled="panel !== undefined">Add New Stop</v-btn>
-                </v-toolbar>
-
-                <v-expansion-panels focusable inset :disabled="panelsDisabled" v-model="panel">
-                    <v-expansion-panel v-for="(item, i) in table2data" :key="i">
-                        <v-expansion-panel-header :class="panel === i ? 'px-3 py-0' : 'px-3 py-0 background'" hide-actions>
-                            <template v-slot:default="{ open }">
-                                <v-row no-gutters justify="space-between" align="center">
-                                    <v-col :cols="open ? 'auto' : '3'">
-                                        <v-fade-transition leave-absolute>
-                                            <span v-if="open" key="0" class="primary--text">Stop #{{i + 1}}: {{item.name}} is under service ADELONG PO of Customer #</span>
-                                            <span v-else key="1">Stop #{{i + 1}}: {{ item.name }}</span>
-                                        </v-fade-transition>
-                                    </v-col>
-                                    <v-col cols="auto">
-
-                                        <v-fade-transition leave-absolute>
-                                            <span class="text--secondary" v-if="!open" key="0">Duration: 3600</span>
-                                        </v-fade-transition>
-                                    </v-col>
-                                    <v-fade-transition leave-absolute>
-                                        <v-col v-if="!open" cols="auto" key="0">
-                                            <v-btn icon color="primary" title="Inactivate stop" @click.stop="panel = i"><v-icon>mdi-pencil</v-icon></v-btn>
-                                            <v-btn icon color="" title="Inactivate stop" @click.stop=""><v-icon>mdi-arrow-up-bold-outline</v-icon></v-btn>
-                                            <v-btn icon color="" title="Inactivate stop" @click.stop=""><v-icon>mdi-arrow-down-bold-outline</v-icon></v-btn>
-                                        </v-col>
-                                    </v-fade-transition>
-                                </v-row>
-                            </template>
-                        </v-expansion-panel-header>
-                        <v-expansion-panel-content class="pa-0">
-                            <ServiceStopForm />
-                            <v-row justify="center" align="center">
-                                <v-col cols="auto">
-                                    <v-btn color="red" dark @click.stop="panel = undefined">cancel</v-btn>
-                                </v-col>
-                                <v-col cols="auto">
-                                    <v-btn color="green" dark large @click.stop="panel = undefined">save service stop</v-btn>
-                                </v-col>
-                            </v-row>
-                        </v-expansion-panel-content>
-                    </v-expansion-panel>
-                </v-expansion-panels>
-
             </v-col>
 
             <v-col cols="12">
-                <v-btn color="green darken-2" dark x-large block @click="finishEditing">
+                <v-toolbar flat dense color="primary" dark>
+                    <v-toolbar-title class="subtitle-1">
+                        Stops under service <b class="yellow--text">{{service.custrecord_service_text}} (${{service.custrecord_service_price}})</b>
+                    </v-toolbar-title>
+                    <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-toolbar-title class="caption yellow--text">
+                        {{ customer.entityid }} {{customer.companyname}}
+                    </v-toolbar-title>
+                    <v-spacer></v-spacer>
+
+                    <v-btn outlined color="secondary" small dark
+                           @click.stop="$store.dispatch('service-stops/createNewServiceStopOfCurrentService')">
+                        Add New Stop
+                    </v-btn>
+                </v-toolbar>
+
+                <v-timeline dense>
+                    <v-timeline-item v-for="(serviceStop, i) in serviceStops" :key="`serviceStop${i}`">
+                        {{serviceStop}}
+                    </v-timeline-item>
+
+                    <v-timeline-item class="mb-4" color="red" icon-color="grey lighten-2" small>
+                        <v-row justify="space-between">
+                            <v-col cols="auto">
+                                This order was archived.
+                            </v-col>
+                            <v-col><v-btn>edit</v-btn></v-col>
+                            <v-col
+                                class="text-right"
+                                cols="auto"
+                            >
+                                15:26 EDT
+                            </v-col>
+                        </v-row>
+                    </v-timeline-item>
+
+                    <v-timeline-item
+                        class="mb-4"
+                        small
+                    >
+                        <v-row justify="space-between">
+                            <v-col cols="7">
+                                <v-chip
+                                    class="white--text ml-0"
+                                    color="purple"
+                                    label
+                                    small
+                                >
+                                    APP
+                                </v-chip>
+                                Digital Downloads fulfilled 1 item.
+                            </v-col>
+                            <v-col
+                                class="text-right"
+                                cols="5"
+                            >
+                                15:25 EDT
+                            </v-col>
+                        </v-row>
+                    </v-timeline-item>
+
+                    <v-timeline-item
+                        class="mb-4"
+                        color="grey"
+                        small
+                    >
+                        <v-row justify="space-between">
+                            <v-col cols="7">
+                                Order confirmation email was sent to John Leider (john@vuetifyjs.com).
+                            </v-col>
+                            <v-col
+                                class="text-right"
+                                cols="5"
+                            >
+                                15:25 EDT
+                            </v-col>
+                        </v-row>
+                    </v-timeline-item>
+
+                    <v-timeline-item
+                        class="mb-4"
+                        hide-dot
+                    >
+                        <v-btn
+                            class="mx-0"
+                        >
+                            Resend Email
+                        </v-btn>
+                    </v-timeline-item>
+
+                    <v-timeline-item
+                        class="mb-4"
+                        color="grey"
+                        small
+                    >
+                        <v-row justify="space-between">
+                            <v-col cols="7">
+                                A $15.00 USD payment was processed on PayPal Express Checkout
+                            </v-col>
+                            <v-col
+                                class="text-right"
+                                cols="5"
+                            >
+                                15:25 EDT
+                            </v-col>
+                        </v-row>
+                    </v-timeline-item>
+
+                    <v-timeline-item
+                        color="grey"
+                        small
+                    >
+                        <v-row justify="space-between">
+                            <v-col cols="7">
+                                John Leider placed this order on Online Store (checkout #1937432132572).
+                            </v-col>
+                            <v-col
+                                class="text-right"
+                                cols="5"
+                            >
+                                15:25 EDT
+                            </v-col>
+                        </v-row>
+                    </v-timeline-item>
+                </v-timeline>
+            </v-col>
+
+            <v-col cols="12">
+                <v-btn color="green darken-2" dark large block @click="finishEditing" :disabled="panel !== undefined">
                     finish editing service stops
                 </v-btn>
             </v-col>
@@ -84,15 +158,45 @@ export default {
         ],
 
         panelsDisabled: false,
+
+        items: [
+            {
+                color: 'red lighten-2',
+                icon: 'mdi-star',
+            },
+            {
+                color: 'purple darken-1',
+                icon: 'mdi-book-variant',
+            },
+            {
+                color: 'green lighten-1',
+                icon: 'mdi-airballoon',
+            },
+            {
+                color: 'indigo',
+                icon: 'mdi-buffer',
+            },
+        ],
     }),
     methods: {
         finishEditing() {
             this.panel = undefined;
             this.$store.commit('setRoute', 'customers');
+        },
+        addNewStop() {
+
         }
     },
     computed: {
-
+        serviceStops() {
+            return this.$store.getters['service-stops/ofCurrentService'].data;
+        },
+        service() {
+            return this.$store.getters['services/selectedItem'];
+        },
+        customer() {
+            return this.$store.getters['customers/selectedItem'];
+        }
     },
     watch: {
         panel(val) {

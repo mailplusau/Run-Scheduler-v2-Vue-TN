@@ -57,7 +57,7 @@
                                 <v-list-item :key="`service-stop-${index}-${innerIndex}`" @click="dialogOpen = true">
                                     <v-list-item-action>
                                         <v-list-item-action-text class="black--text subtitle-2">
-                                            {{ serviceStop.time}}
+                                            {{ serviceStop.stopTime}} ({{ serviceStop.stopDuration }})
                                         </v-list-item-action-text>
                                     </v-list-item-action>
 
@@ -65,12 +65,11 @@
 
                                     <v-list-item-content>
                                         <v-list-item-title>
-                                            {{ serviceStop.stopName }}
+                                            {{ serviceStop.custrecord_1288_stop_name }}
                                         </v-list-item-title>
 
                                         <v-list-item-subtitle>
-                                            {{ serviceStop.address.addr1 }} {{ serviceStop.address.addr2 }},
-                                            {{ serviceStop.address.city }} {{ serviceStop.address.state }} {{ serviceStop.address.zip }}
+                                            {{serviceStop.address}} ({{ serviceStop.addressType }})
                                         </v-list-item-subtitle>
                                     </v-list-item-content>
                                 </v-list-item>

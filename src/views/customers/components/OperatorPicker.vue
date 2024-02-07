@@ -1,12 +1,44 @@
 <script>
+import {rules} from '@/utils/utils.mjs';
+
 export default {
     name: "OperatorPicker",
+    props: {
+        value: {
+            type: String | null,
+            required: true,
+        },
+        prefix: {
+            type: String,
+            default: '',
+            required: false,
+        },
+        prependIcon: {
+            type: String,
+            default: 'mdi-account',
+            required: false,
+        },
+        placeholder: {
+            type: String,
+            default: '',
+            required: false,
+        },
+        rules: {
+            type: Array,
+            default: () => ([]),
+            required: false,
+        }
+    },
     data: () => ({
         dialog: false,
         operatorId: null,
         selectedOperatorId: null,
     }),
+    mounted() {
+        this.selectedOperatorId = this.value;
+    },
     methods: {
+        validate: rules.validate,
         confirmSelection() {
             this.selectedOperatorId = this.operatorId;
             this.$emit('input', this.selectedOperatorId);
@@ -15,6 +47,7 @@ export default {
         },
         handleInputCleared() {
             this.selectedOperatorId = null;
+            this.$emit('input', this.selectedOperatorId);
         }
     },
     computed: {
@@ -22,7 +55,8 @@ export default {
             if (!this.selectedOperatorId) return '';
 
             let index = this.$store.getters['operators/picker'].data.findIndex(item => item.internalid === this.selectedOperatorId);
-            return index >= 0 ? this.$store.getters['operators/picker'].data[index].name + ` (of franchisee ${this.selectedFranchisee})` : '';
+            let franchiseeStr = this.selectedFranchisee ? ` (of franchisee ${this.selectedFranchisee})` : '';
+            return index >= 0 ? this.$store.getters['operators/picker'].data[index].name + franchiseeStr : '';
         },
         selectedFranchisee() {
             let index = this.$store.getters['franchisees/all'].findIndex(item => item.internalid === this.franchisee);
@@ -56,17 +90,16 @@ export default {
 </script>
 
 <template>
-    <v-dialog
-        v-model="dialog"
+    <v-dialog v-model="dialog"
         scrollable
-        max-width="350px"
-    >
-        {{selectedOperatorId}}
+        max-width="350px">
         <template v-slot:activator="{ on, attrs }">
-            <v-text-field prefix="Relief Driver:"
-                          placeholder="(click to select a relief driver)" dense outlined
+            <v-text-field :prefix="prefix"
+                          :placeholder="placeholder"
+                          dense outlined
                           :value="displayText" clearable readonly
-                          prepend-icon="mdi-account" v-bind="attrs" v-on="on" @click:clear="handleInputCleared">
+                          :rules="rules"
+                          :prepend-icon="prependIcon" v-bind="attrs" v-on="on" @click:clear="handleInputCleared">
             </v-text-field>
         </template>
         <v-card class="background" :loading="loading" :disabled="loading">

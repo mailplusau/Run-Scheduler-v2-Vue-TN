@@ -17,7 +17,9 @@
 
             <CalendarView />
             <CustomersView />
+            <ServiceStopsView />
 
+            <ServiceStopDialog />
         </v-main>
 
         <GlobalNotificationModal />
@@ -28,13 +30,17 @@
 import GlobalNotificationModal from "@/components/GlobalNotificationModal";
 import CalendarView from "@/views/calendar/Main.vue";
 import CustomersView from "@/views/customers/Main.vue";
+import ServiceStopsView from "@/views/service-stops/Main.vue";
+import ServiceStopDialog from '@/views/customers/components/ServiceStopDialog.vue';
 
 export default {
     name: 'App',
     components: {
+        ServiceStopDialog,
         GlobalNotificationModal,
         CalendarView,
-        CustomersView
+        CustomersView,
+        ServiceStopsView
     },
     beforeCreate() {
         this.$store.dispatch('init');

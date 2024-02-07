@@ -1,5 +1,7 @@
 <template>
-    <v-data-table :headers="headers" :items="customers" :loading="loading"
+    <v-data-table :headers="headers" :items="customers"
+                  :search="search"
+                  :loading="loading"
                   :no-data-text="franchisee ? 'No Customer belongs to this franchisee' : 'Please select a franchisee first'"
                   :items-per-page="5"
                   class="elevation-5 background" :hide-default-footer="customers.length <= 5" loading-text="Loading customers..."
@@ -7,7 +9,7 @@
 
         <template v-slot:top>
             <v-toolbar flat dense color="primary" dark>
-                <v-toolbar-title>Customer List</v-toolbar-title>
+                <v-toolbar-title>Customers</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-toolbar-title class="caption yellow--text">
                     {{ '' }}
@@ -23,7 +25,13 @@
                                 placeholder="(Select a franchisee)"
                                 hide-details dense solo-inverted></v-autocomplete>
 
-                <v-text-field label="" placeholder="Search..." class="ml-2" hide-details dense solo-inverted append-icon="mdi-magnify"></v-text-field>
+                <v-slide-x-transition leave-absolute hide-on-leave>
+                    <v-btn icon v-if="!searchEnabled" @click.stop="enableSearch" key="0"><v-icon>mdi-magnify</v-icon></v-btn>
+                    <v-text-field v-else key="1" label="" placeholder="Search..." class="ml-2" ref="customerSearch"
+                                  clearable
+                                  v-model="search" @blur="disableSearch"
+                                  hide-details dense solo-inverted append-icon="mdi-magnify"></v-text-field>
+                </v-slide-x-transition>
             </v-toolbar>
         </template>
 
@@ -62,9 +70,10 @@ export default {
             {value: 'internalid', text: 'ID', align: 'start'},
             {value: 'companyname', text: 'Name', align: 'center', sortable: false},
             {value: 'isScheduled', text: 'Scheduled', align: 'center', sortable: false},
-            {value: 'suspendedServices', text: 'Suspended Services', align: 'center', sortable: false},
             {value: 'data-table-expand', text: ''},
         ],
+        search: '',
+        searchEnabled: false,
     }),
     methods: {
         handleRowClick(e, v) {
@@ -73,6 +82,15 @@ export default {
             this.selectedRow.splice(0, 1, v.item);
             this.$store.dispatch('customers/setSelected', v.item['internalid']);
         },
+        enableSearch() {
+            this.searchEnabled = true;
+            this.$nextTick(() => {
+                this.$refs?.customerSearch?.focus();
+            })
+        },
+        disableSearch() {
+            if (!this.search) this.searchEnabled = false;
+        }
     },
     computed: {
         customers() {

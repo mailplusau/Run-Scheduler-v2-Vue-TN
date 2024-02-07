@@ -45,7 +45,7 @@ const state = {
     }
 };
 
-state.picker.data = testData
+// state.picker.data = testData
 
 const getters = {
     all : state => state.data,

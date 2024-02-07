@@ -6,44 +6,29 @@
                     View Calendar
                 </v-btn>
             </v-col>
-            <v-col :cols="sidePanel ? 7 : 12">
+            <v-col lg="7" cols="6">
                 <CustomerTable />
             </v-col>
 
-            <v-col :cols="sidePanel ? 5 : 0">
+            <v-col lg="5" cols="6">
                 <ServiceTable />
             </v-col>
         </v-row>
 
-        <ServiceStopDialog v-model="serviceStopDialog" />
     </PageWrapper>
 </template>
 
 <script>
 import PageWrapper from '@/components/core/PageWrapper.vue';
-import ServiceStopDialog from '@/views/customers/components/ServiceStopDialog.vue';
 import CustomerTable from '@/views/customers/components/CustomerTable.vue';
 import ServiceTable from '@/views/customers/components/ServiceTable.vue';
 
 export default {
     name: "Main",
-    components: {ServiceTable, CustomerTable, ServiceStopDialog, PageWrapper},
+    components: {ServiceTable, CustomerTable, PageWrapper},
     data: () => ({
         sidePanel: true,
     }),
-    methods: {
-
-    },
-    computed: {
-        serviceStopDialog: {
-            get() {
-                return this.$store.getters['service-stops/dialog'].open;
-            },
-            set(val) {
-                this.$store.getters['service-stops/dialog'].open = val;
-            }
-        }
-    }
 };
 </script>
 
