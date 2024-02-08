@@ -173,14 +173,7 @@ export default {
             </v-row>
 
             <v-row class="mt-0">
-                <v-col cols="5">
-                    <v-autocomplete outlined dense prefix="Frequency Cycle:"
-                                    v-model="formData.custrecord_1288_frequency_cycle"
-                                    :items="$store.getters['misc/frequencyCycle']"
-                                    :rules="[v => validate(v, 'required')]">
-                    </v-autocomplete>
-                </v-col>
-                <v-col cols="7">
+                <v-col cols="12">
                     <v-select outlined dense prefix="This service runs"
                               :menu-props="{ bottom: true, offsetY: true }"
                               :items="serviceTimeOptions" v-model="serviceTime"
@@ -189,58 +182,49 @@ export default {
             </v-row>
 
             <v-row v-show="serviceTime === 0" class="mt-0">
-                <v-col cols="6">
+                <v-col cols="12">
                     <EditableTimeInput prepend-icon="mdi-timer-check-outline" prefix="Service Time:"
                                        :value="getServiceTime(0)" @input="v => setServiceTime(0, v)"
                                        :disabled="serviceTimeDisabled" />
                 </v-col>
-                <v-col cols="6">
-                    <v-text-field prefix="Service Duration:" outlined dense hint="Unit in second(s)" persistent-hint
-                                  :value="getServiceDuration(0)" @input="v => setServiceDuration(0, v)"
-                                  @keydown="allowOnlyNumericalInput"
-                                  :rules="[v => validate(v, 'required|minValue:60')]"
-                                  :disabled="serviceTimeDisabled"></v-text-field>
-                </v-col>
+<!--                <v-col cols="6">-->
+<!--                    <v-text-field prefix="Service Duration:" outlined dense hint="Unit in second(s)" persistent-hint-->
+<!--                                  :value="getServiceDuration(0)" @input="v => setServiceDuration(0, v)"-->
+<!--                                  @keydown="allowOnlyNumericalInput"-->
+<!--                                  :rules="[v => validate(v, 'required|minValue:60')]"-->
+<!--                                  :disabled="serviceTimeDisabled"></v-text-field>-->
+<!--                </v-col>-->
             </v-row>
 
             <template v-for="(day, i) in formData.custrecord_1288_frequency.split(',')">
                 <v-row v-show="serviceTime === 1 && parseInt(day) === 1" class="mt-0">
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <v-text-field prepend-icon="mdi-timeline-plus-outline" readonly outlined dense :value="dayArray[i]"></v-text-field>
                     </v-col>
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <EditableTimeInput prefix="Service Time:"
                                            :value="getServiceTime(i)" @input="v => setServiceTime(i, v)" />
                     </v-col>
-                    <v-col cols="4">
-                        <v-text-field prefix="Service Duration:" outlined dense hint="Unit in second(s)" persistent-hint
-                                      :value="getServiceDuration(i)" @input="v => setServiceDuration(i, v)"
-                                      @keydown="allowOnlyNumericalInput"
-                                      :rules="[v => validate(v, 'required|minValue:60')]"></v-text-field>
-                    </v-col>
+<!--                    <v-col cols="4">-->
+<!--                        <v-text-field prefix="Service Duration:" outlined dense hint="Unit in second(s)" persistent-hint-->
+<!--                                      :value="getServiceDuration(i)" @input="v => setServiceDuration(i, v)"-->
+<!--                                      @keydown="allowOnlyNumericalInput"-->
+<!--                                      :rules="[v => validate(v, 'required|minValue:60')]"></v-text-field>-->
+<!--                    </v-col>-->
                 </v-row>
             </template>
 
             <v-row class="mt-0">
-                <v-col cols="12">
+                <v-col :cols="transferPoint === 1 ? 6 : 12">
                     <v-select dense outlined prefix="This stop"
                               :menu-props="{ bottom: true, offsetY: true }"
                               :items="transferPointOptions" v-model="transferPoint"></v-select>
                 </v-col>
-
-                <template v-if="transferPoint === 1">
-                    <v-col cols="12">
-                        <OperatorPicker prepend-icon="mdi-account" prefix="Transfer to driver:"
-                                        :rules="[v => validate(v, 'required')]"
-                                        v-model="formData.custrecord_1288_transfer_operator" />
-                    </v-col>
-                    <v-col cols="6">
-                        <v-autocomplete prepend-icon="mdi-account" dense outlined prefix="Transfer to franchisee:"></v-autocomplete>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-autocomplete dense outlined prefix="Operator:"></v-autocomplete>
-                    </v-col>
-                </template>
+                <v-col cols="6" v-if="transferPoint === 1">
+                    <OperatorPicker prepend-icon="mdi-account" prefix="Transfer to driver:"
+                                    :rules="[v => validate(v, 'required')]"
+                                    v-model="formData.custrecord_1288_transfer_operator" />
+                </v-col>
             </v-row>
 
             <v-row class="mt-0">

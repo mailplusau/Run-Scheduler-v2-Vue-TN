@@ -148,6 +148,11 @@ function _writeResponseJson(response, body) {
 }
 
 const getOperations = {
+    'getCurrentUserDetails' : function (response) {
+        let fieldIds = ['id', 'role', 'name', 'email'];
+
+        _writeResponseJson(response, fieldIds.map(fieldId => NS_MODULES.runtime['getCurrentUser']()[fieldId]));
+    },
     'getSelectOptions' : function (response, {id, type, valueColumnName, textColumnName}) {
         let {search} = NS_MODULES;
         let data = [];
@@ -265,13 +270,17 @@ const getOperations = {
         let customers = [];
 
         NS_MODULES.search.create({
-            type: "customer",
+            type: 'customer',
             filters:
                 [
-                    ["partner", "is", partnerId],
+                    ['partner', 'is', partnerId],
+                    'AND',
+                    ['isinactive', 'is', false],
+                    'AND',
+                    ['entitystatus', 'is', 13]
                 ],
             columns:
-                [ 'internalid', 'entityid', 'companyname' ]
+                [ 'internalid', 'entityid', 'companyname', 'partner' ]
         }).run().each(result => {
             let tmp = {};
             for (let column of result.columns) {
@@ -295,6 +304,8 @@ const getOperations = {
                     ["custrecord_service_customer", "is", customerId],
                     "AND",
                     ["isinactive", "is", false],
+                    "AND",
+                    ["custrecord_service_category", "is", 1], // Service Category: Services (1)
                 ],
             columns:
                 [
@@ -520,6 +531,7 @@ const postOperations = {
                     value: isoStringRegex.test(serviceStopData[fieldId]) ? new Date(serviceStopData[fieldId]) : serviceStopData[fieldId]
                 });
 
+        // TODO: send a notification to Data Admins if an address is manually entered
         serviceStopId = serviceStopRecord.save({ignoreMandatoryFields: true});
 
         _writeResponseJson(response, serviceStopId);

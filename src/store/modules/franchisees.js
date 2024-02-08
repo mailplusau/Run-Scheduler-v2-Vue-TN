@@ -22,6 +22,8 @@ const actions = {
     },
     setSelected : (context, id) => {
         context.commit('setSelected', id);
+        context.commit('services/clearData', null, {root: true});
+        context.commit('service-stops/clearDataOfWeek', null, {root: true});
         context.dispatch('run-plans/init', null, {root: true}).then();
         context.dispatch('customers/init', null, {root: true}).then();
         context.dispatch('operators/setFranchiseeForPicker', id, {root: true}).then();

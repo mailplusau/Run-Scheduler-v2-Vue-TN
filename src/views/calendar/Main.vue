@@ -107,7 +107,7 @@ export default {
     },
     computed: {
         serviceDays() {
-            return this.$store.getters['service-stops/all'];
+            return this.$store.getters['service-stops/ofWeek'];
         },
         franchisees() {
             return this.$store.getters['franchisees/all'];

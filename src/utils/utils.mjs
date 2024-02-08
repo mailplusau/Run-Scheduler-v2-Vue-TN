@@ -10,12 +10,10 @@ export const VARS = {
         custrecord_1288_operator: null,
         custrecord_1288_stop_name: '',
         custrecord_1288_frequency: '0,0,0,0,0,0',
-        custrecord_1288_frequency_cycle: null,
         custrecord_1288_stop_times: '9:00|1800,9:00|1800,9:00|1800,9:00|1800,9:00|1800,9:00|1800',
         custrecord_1288_notes: '',
         custrecord_1288_sequence: 0,
         custrecord_1288_is_transfer: '2', // Yes (1), No (2)
-        custrecord_1288_transfer_franchisee: null,
         custrecord_1288_transfer_operator: null,
         custrecord_1288_address_type: 1, // Manual (1), Book (2), Postal (3)
         custrecord_1288_address_book: null,

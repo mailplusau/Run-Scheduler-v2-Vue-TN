@@ -250,6 +250,8 @@ const getters = {
 
 const mutations = {
     setSelected : (state, id) => state.selected = id,
+
+    clearData : state => state.data.splice(0),
 };
 
 const actions = {

@@ -18,6 +18,12 @@
             </v-toolbar>
         </template>
 
+        <template v-slot:item.scheduled="{ item }">
+            <v-icon :color="item.isScheduled ? 'green' : 'red'">
+                {{ item.isScheduled ? 'mdi-check' : 'mdi-close'}}
+            </v-icon>
+        </template>
+
         <template v-slot:item.actions="{ item }">
 <!--            <v-btn icon color="primary" title="Edit stop" @click.stop="handleServiceDetailClick"><v-icon>mdi-pencil</v-icon></v-btn>-->
             <v-btn icon color="red" title="Delete stop" @click.stop=""><v-icon>mdi-delete</v-icon></v-btn>
@@ -34,7 +40,7 @@ export default {
         headers: [
             {value: 'name', text: 'Name', align: 'start', sortable: false},
             {value: 'custrecord_service_price', text: 'Price', align: 'center', sortable: false},
-            {value: 'custrecord_service_description', text: 'Description', align: 'center', sortable: false},
+            {value: 'scheduled', text: 'Scheduled', align: 'center', sortable: false},
             {value: 'actions', text: '', align: 'end', sortable: false}
         ],
     }),

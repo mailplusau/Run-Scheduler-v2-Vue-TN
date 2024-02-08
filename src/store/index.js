@@ -112,6 +112,7 @@ const actions = {
             context.dispatch('run-plans/init'),
             context.dispatch('customers/init'),
             context.dispatch('misc/init'),
+            context.dispatch('user/init'),
         ])
 
         context.dispatch('service-stops/init').then();

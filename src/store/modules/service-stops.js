@@ -215,7 +215,8 @@ const getters = {
     data : state => state.data,
     ofCurrentService : state => state.ofCurrentService,
     formDialog : state => state.formDialog,
-    all : (state, getters, rootState, rootGetters) => {
+    ofWeekLoading : state => state.ofWeek.loading,
+    ofWeek : (state, getters, rootState, rootGetters) => {
         let today = getDay(new Date());
 
         let obj = [
@@ -227,7 +228,7 @@ const getters = {
             { day: 6, date: 'ADHOC', stops: [] },
         ]
 
-        state.data.forEach(stop => {
+        state.ofWeek.data.forEach(stop => {
             let daysOfWeek = stop.custrecord_1288_frequency.split(',');
             let stopTimePerDay = stop.custrecord_1288_stop_times.split(',');
 
@@ -271,11 +272,16 @@ const mutations = {
         let arr = ['custrecord_1288_manual_address', 'custrecord_1288_address_book', 'custrecord_1288_postal_location'];
         state.formDialog.form.custrecord_1288_address_type = typeId;
         state.formDialog.form[arr[typeId - 1]] = data;
-    }
+    },
+
+    clearDataOfWeek : state => { state.ofWeek.data.splice(0); },
 };
 
 const actions = {
     init : async context => {
+        await _getServiceStopsBySelectedPlan(context);
+    },
+    getDataBySelectedPlan : async context => {
         await _getServiceStopsBySelectedPlan(context);
     },
     getDataBySelectedService : async context => {
@@ -351,7 +357,9 @@ const actions = {
 async function _getServiceStopsBySelectedPlan(context) {
     if (!context.rootGetters['run-plans/selected']) return;
 
-    context.state.data = await http.get('getServiceStopsByPlanId', {planId: context.rootGetters['run-plans/selected']});
+    context.state.ofWeek.loading = true;
+    context.state.ofWeek.data = await http.get('getServiceStopsByPlanId', {planId: context.rootGetters['run-plans/selected']});
+    context.state.ofWeek.loading = false;
 }
 
 function _parseNSDateTimeStrForDateTimeInput(dateStr) {
