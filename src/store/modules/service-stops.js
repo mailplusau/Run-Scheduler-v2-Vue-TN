@@ -1,4 +1,4 @@
-import { getDay, addDays, format } from 'date-fns';
+import {getDay, addDays, format, addMinutes} from 'date-fns';
 import http from '@/utils/http';
 import {VARS} from '@/utils/utils.mjs';
 
@@ -68,7 +68,7 @@ const testData = [
         "custrecord_1288_frequency_text": null,
         "custrecord_1288_frequency_cycle": "5",
         "custrecord_1288_frequency_cycle_text": "Date Specific",
-        "custrecord_1288_stop_times": "7:00|600,7:00|600,7:00|600,7:00|600,7:00|600,7:00|600",
+        "custrecord_1288_stop_times": "09:00|600,09:00|600,09:00|600,09:00|600,09:00|600,09:00|600",
         "custrecord_1288_stop_times_text": null,
         "custrecord_1288_notes": "",
         "custrecord_1288_notes_text": null,
@@ -114,7 +114,7 @@ const testData = [
         "custrecord_1288_frequency_text": null,
         "custrecord_1288_frequency_cycle": "5",
         "custrecord_1288_frequency_cycle_text": "Date Specific",
-        "custrecord_1288_stop_times": "7:00|600,7:00|600,7:00|600,7:00|600,7:00|600,7:00|600",
+        "custrecord_1288_stop_times": "07:00|600,07:00|600,07:00|600,07:00|600,07:00|600,07:00|600",
         "custrecord_1288_stop_times_text": null,
         "custrecord_1288_notes": "",
         "custrecord_1288_notes_text": null,
@@ -202,11 +202,16 @@ const state = {
     formDialog: {
         form: {},
         open: false,
+        serviceTime: 0,
+        serviceTimeOptions: [
+            {value: 0, text: 'at the same time everyday'},
+            {value: 1, text: 'at different time for each day'}
+        ],
     },
 
 };
 
-// state.data = testData;
+state.ofWeek.data = testData;
 // state.ofCurrentService.data = testData;
 state.formDialog.form = {...VARS.serviceStopDefault};
 
@@ -216,6 +221,7 @@ const getters = {
     ofCurrentService : state => state.ofCurrentService,
     formDialog : state => state.formDialog,
     ofWeekLoading : state => state.ofWeek.loading,
+    ofWeekData : state => state.ofWeek.data,
     ofWeek : (state, getters, rootState, rootGetters) => {
         let today = getDay(new Date());
 
@@ -237,8 +243,11 @@ const getters = {
                     let [stopTime, stopDuration] = stopTimePerDay[index].split('|');
                     let addressTypes = ['Manually Entered', 'Address Book', 'Postal Location']
 
+                    let eventTime = new Date(format(addDays(new Date(), obj[index].day - today), "yyyy-MM-dd") + 'T' + stopTime);
                     obj[index].stops.push({
                         ...stop,
+                        eventStart: eventTime.getTime(),
+                        eventEnd: addMinutes(eventTime, 30).getTime(),
                         stopTime, stopDuration,
                         address: rootGetters['addresses/getFormattedAddress'](parseInt(stop.custrecord_1288_address_type), stop),
                         addressType: addressTypes[parseInt(stop.custrecord_1288_address_type) - 1]
@@ -249,8 +258,8 @@ const getters = {
 
         obj.forEach(weekDay => {
             weekDay.stops.sort((a, b) => {
-                if (a.time < b.time) return -1;
-                else if (a.time > b.time) return 1;
+                if (a.stopTime < b.stopTime) return -1;
+                else if (a.stopTime > b.stopTime) return 1;
                 else return 0;
             })
         })
@@ -287,9 +296,11 @@ const actions = {
     getDataBySelectedService : async context => {
         if (!context.rootGetters['services/selected']) return;
 
+        context.commit('displayBusyGlobalModal', {title: 'Processing', message: 'Retrieving information. Please wait :)'}, {root: true});
         context.state.ofCurrentService.loading = true;
         context.state.ofCurrentService.data = await http.get('getServiceStopsByServiceId', {serviceId: context.rootGetters['services/selected']});
         context.state.ofCurrentService.loading = false;
+        context.commit('closeGlobalModal', null, {root: true});
     },
 
     createNewServiceStopOfCurrentService : context => {
@@ -310,6 +321,7 @@ const actions = {
             context.state.formDialog.form.custrecord_1288_frequency = terms.map(term => !!service[`custrecord_service_day_${term}`] ? 1 : 0).join(',');
             context.state.formDialog.form.custrecord_1288_stop_times = terms.map(() => '07:00|600').join(',');
 
+            context.state.formDialog.serviceTime = 0;
         }
 
         context.state.formDialog.open = true;
@@ -324,6 +336,15 @@ const actions = {
         data['custrecord_1288_relief_start'] = _parseNSDateTimeStrForDateTimeInput(data['custrecord_1288_relief_start']);
         data['custrecord_1288_relief_end'] = _parseNSDateTimeStrForDateTimeInput(data['custrecord_1288_relief_end']);
         context.state.formDialog.form = {...data};
+
+        const stopTimes = context.state.formDialog.form.custrecord_1288_stop_times.split(',');
+        const prevStopTime = stopTimes[0];
+        for (let stopTime of stopTimes)
+            if (stopTime !== prevStopTime) {
+                context.state.formDialog.serviceTime = 1;
+                break;
+            }
+
 
         context.state.formDialog.open = true;
     },
@@ -351,6 +372,9 @@ const actions = {
         }, {root: true});
 
         _getServiceStopsBySelectedPlan(context).then();
+    },
+    saveServiceStopData : async (context, {serviceStopId, serviceStopData}) => {
+        await http.post('saveServiceStop', {serviceStopId, serviceStopData});
     }
 };
 

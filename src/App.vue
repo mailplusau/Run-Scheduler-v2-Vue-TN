@@ -19,6 +19,7 @@
             <CustomersView />
             <ServiceStopsView />
 
+            <WeeklyEventCalendar />
         </v-main>
 
         <GlobalNotificationModal />
@@ -30,10 +31,12 @@ import GlobalNotificationModal from "@/components/GlobalNotificationModal";
 import CalendarView from "@/views/calendar/Main.vue";
 import CustomersView from "@/views/customers/Main.vue";
 import ServiceStopsView from "@/views/service-stops/Main.vue";
+import WeeklyEventCalendar from '@/views/calendar/components/WeeklyEventCalendar.vue';
 
 export default {
     name: 'App',
     components: {
+        WeeklyEventCalendar,
         GlobalNotificationModal,
         CalendarView,
         CustomersView,

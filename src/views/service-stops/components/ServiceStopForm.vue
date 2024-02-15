@@ -11,11 +11,6 @@ export default {
     data: () => ({
         dayArray: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         formValid: true,
-        serviceTime: 0,
-        serviceTimeOptions: [
-            {value: 0, text: 'at the same time everyday'},
-            {value: 1, text: 'at different time for each day'}
-        ],
         transferPoint: 0,
         transferPointOptions: [
             {value: 0, text: 'is not a transfer point'},
@@ -91,6 +86,17 @@ export default {
         formData() {
             return this.$store.getters['service-stops/formDialog'].form;
         },
+        serviceTime: {
+            get() {
+                return this.$store.getters['service-stops/formDialog'].serviceTime;
+            },
+            set(val) {
+                this.$store.getters['service-stops/formDialog'].serviceTime = val;
+            }
+        },
+        serviceTimeOptions() {
+            return this.$store.getters['service-stops/formDialog'].serviceTimeOptions;
+        }
     },
     watch: {
         'formData.custrecord_1288_frequency' : function (val) {
