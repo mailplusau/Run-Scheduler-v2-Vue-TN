@@ -166,7 +166,7 @@ const actions = {
                     let index = context.state.picker.customerAddresses.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
 
                     if (index >= 0) {
-                        context.state.picker.customerAddresses[addressId + ''] = _getCustomerAddressString(context.state.picker.customerAddresses[index])
+                        context.state.cache.customerAddresses[addressId + ''] = _getCustomerAddressString(context.state.picker.customerAddresses[index])
                     } else { // request from suitelet
                         let addressData = await http.get('getCustomerAddressById', {customerId, addressId});
                         context.state.cache.customerAddresses[addressId + ''] = _getCustomerAddressString(addressData)
@@ -175,7 +175,7 @@ const actions = {
                     let index = context.state.picker.postalLocations.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
 
                     if (index >= 0) {
-                        context.state.picker.postalLocations[addressId + ''] = _getPostalLocationString(context.state.picker.postalLocations[index]);
+                        context.state.cache.postalLocations[addressId + ''] = _getPostalLocationString(context.state.picker.postalLocations[index]);
                     } else { // request from suitelet
                         let addressData = await http.get('getPostalLocationById', {postalLocationId: addressId});
                         context.state.cache.postalLocations[addressId + ''] = _getPostalLocationString(addressData)
