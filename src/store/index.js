@@ -16,6 +16,7 @@ const state = {
     standaloneMode: false,
 
     route: 'calendar',
+    routeScroll: {},
 
     globalModal: {
         open: false,
@@ -92,9 +93,30 @@ const mutations = {
 
     goToRoute: (state, route) => {
         routeList.push(state.route);
+
+        // save the current scroll position before switching route
+        Vue.set(state.routeScroll, state.route, document.getElementsByTagName('html')[0].scrollTop);
+
         state.route = route;
+
+        // restore scroll position on the new route (if any)
+        setTimeout(() => {
+            document.getElementsByTagName('html')[0].scrollTop = state.routeScroll[state.route] || 0;
+        }, 200);
     },
-    navigateBack : state => { if (routeList.length) state.route = routeList.pop(); }
+    navigateBack : state => {
+        if (routeList.length) {
+            // save the current scroll position before switching route
+            Vue.set(state.routeScroll, state.route, document.getElementsByTagName('html')[0].scrollTop);
+
+            state.route = routeList.pop();
+
+            // restore scroll position on the new route (if any)
+            setTimeout(() => {
+                document.getElementsByTagName('html')[0].scrollTop = state.routeScroll[state.route] || 0;
+            }, 200);
+        }
+    }
 };
 
 const actions = {
