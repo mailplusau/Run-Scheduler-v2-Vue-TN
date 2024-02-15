@@ -63,7 +63,7 @@ export default {
             if (!this.$refs.form.validate()) return false;
 
             this.$store.commit('service-stops/saveAddress', {typeId: 3, data: this.picker.postalLocationId});
-            this.$store.commit('addresses/addDataToCache', {typeId: 3, addressId: JSON.stringify(this.manualForm)});
+            this.$store.commit('addresses/addDataToCache', {typeId: 3, addressId: this.picker.postalLocationId});
             this.$store.commit('addresses/resetPicker');
             this.dialog = false;
         },
