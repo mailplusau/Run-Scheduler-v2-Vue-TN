@@ -3,40 +3,41 @@
         <v-row justify="center">
             <v-col cols="12">
                 <v-btn color="primary" @click="$store.commit('goToRoute', 'customers')">
-                    View Customer List
+                    Customer List
+                </v-btn>
+                <v-btn color="primary" class="ml-2" @click="$store.commit('goToRoute', 'weekly-calendar')">
+                    Weekly Calendar
                 </v-btn>
             </v-col>
-            <v-col cols="12">
-                <v-card color="background" elevation="10">
 
-
-                </v-card>
-            </v-col>
             <v-col cols="12">
                 <v-card elevation="10" color="background">
-                    <v-container fluid>
-                        <v-row>
-                            <v-col>
-                                <v-autocomplete prefix="Franchisee:"
-                                                v-model="franchisee"
-                                                :items="franchisees"
-                                                item-value="internalid"
-                                                item-text="companyname"
-                                                placeholder="(Select a franchisee)"></v-autocomplete>
-                            </v-col>
-                            <v-col>
-                                <v-autocomplete prefix="Plan Name:"
-                                                v-model="runPlan"
-                                                :items="runPlans"
-                                                item-value="internalid"
-                                                item-text="name"
-                                                :placeholder="franchisee ? '(Select a run plan)' : 'Please select a franchisee first'"
-                                                :disabled="!franchisee || runPlanLoading"
-                                                :loading="runPlanLoading"
-                                ></v-autocomplete>
-                            </v-col>
-                        </v-row>
-                    </v-container>
+                    <v-toolbar flat dense color="primary" dark>
+                        <v-toolbar-title>Weekly Stops</v-toolbar-title>
+                        <v-divider class="mx-4" inset vertical></v-divider>
+                        <v-toolbar-title class="caption yellow--text">
+                            {{ '' }}
+                        </v-toolbar-title>
+
+                        <v-spacer></v-spacer>
+
+                        <v-autocomplete prefix="Franchisee:" class="mr-2" solo-inverted dense hide-details
+                                        v-model="franchisee"
+                                        :items="franchisees"
+                                        item-value="internalid"
+                                        item-text="companyname"
+                                        placeholder="(Select a franchisee)"
+                        ></v-autocomplete>
+                        <v-autocomplete prefix="Plan:" solo-inverted dense hide-details
+                                        v-model="runPlan"
+                                        :items="runPlans"
+                                        item-value="internalid"
+                                        item-text="name"
+                                        :placeholder="franchisee ? '(Select a run plan)' : 'Please select a franchisee first'"
+                                        :disabled="!franchisee || runPlanLoading"
+                                        :loading="runPlanLoading"
+                        ></v-autocomplete>
+                    </v-toolbar>
 
                     <v-list dense class="calendar-stop-list" color="background">
 
@@ -57,7 +58,7 @@
                                 <v-list-item :key="`service-stop-${index}-${innerIndex}`" @click="editServiceStop(serviceStop)">
                                     <v-list-item-action>
                                         <v-list-item-action-text class="black--text subtitle-2">
-                                            {{ serviceStop.stopTime}} ({{ serviceStop.stopDuration }})
+                                            {{ serviceStop.stopTime}}
                                         </v-list-item-action-text>
                                     </v-list-item-action>
 
@@ -134,9 +135,6 @@ export default {
         runPlanLoading() {
             return this.$store.getters['run-plans/loading'];
         },
-        serviceStops() {
-            return this.$store.getters['service-stops/all'];
-        }
     }
 };
 </script>

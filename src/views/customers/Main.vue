@@ -3,7 +3,10 @@
         <v-row justify="center">
             <v-col cols="12">
                 <v-btn color="primary" @click="$store.commit('goToRoute', 'calendar')">
-                    View Calendar
+                    Weekly Stops
+                </v-btn>
+                <v-btn color="primary" class="ml-2" @click="$store.commit('goToRoute', 'weekly-calendar')">
+                    Weekly Calendar
                 </v-btn>
             </v-col>
             <v-col lg="7" cols="6">
