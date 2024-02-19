@@ -264,8 +264,6 @@ export default {
                     <v-textarea prefix="Notes:" v-model="formData.custrecord_1288_notes" outlined></v-textarea>
                 </v-col>
             </v-row>
-
-            <v-row>{{formData}}</v-row>
         </v-form>
 
     </v-container>

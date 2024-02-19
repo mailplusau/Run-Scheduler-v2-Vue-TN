@@ -383,6 +383,7 @@ async function _getServiceStopsBySelectedPlan(context) {
 
     context.state.ofWeek.loading = true;
     context.state.ofWeek.data = await http.get('getServiceStopsByPlanId', {planId: context.rootGetters['run-plans/selected']});
+    context.dispatch('weekly-events/generate', null, {root: true}).then();
     context.state.ofWeek.loading = false;
 }
 
