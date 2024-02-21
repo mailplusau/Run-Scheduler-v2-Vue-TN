@@ -7,7 +7,7 @@
 
         <template v-slot:top>
             <v-toolbar flat dense color="primary" dark>
-                <v-toolbar-title v-if="customer.companyname" class="subtitle-1 yellow--text">Services of {{customer.companyname}}</v-toolbar-title>
+                <v-toolbar-title v-if="customer['companyname']" class="subtitle-1 yellow--text">Services of {{customer['companyname']}}</v-toolbar-title>
                 <v-toolbar-title  v-else class="subtitle-2 grey--text">No customer selected</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-toolbar-title class="caption yellow--text">
@@ -19,9 +19,8 @@
         </template>
 
         <template v-slot:item.scheduled="{ item }">
-            <v-icon :color="item.isScheduled ? 'green' : 'red'">
-                {{ item.isScheduled ? 'mdi-check' : 'mdi-close'}}
-            </v-icon>
+            <v-icon v-if="isScheduled(item.internalid)" color="green">mdi-check</v-icon>
+            <v-icon v-else color="red">mdi-close</v-icon>
         </template>
 
         <template v-slot:item.actions="{ item }">
@@ -49,6 +48,10 @@ export default {
             this.$store.dispatch('services/setSelected', v.item.internalid);
             this.$store.commit('goToRoute', 'service-stops');
         },
+        isScheduled(serviceId) {
+            let index = this.customer['serviceScheduleReport'].findIndex(item => parseInt(item.internalid) === parseInt(serviceId));
+            return this.customer['serviceScheduleReport'][index]?.stopCount && parseInt(this.customer['serviceScheduleReport'][index]?.stopCount) >= 2;
+        }
     },
     computed: {
         customer() {
@@ -59,7 +62,7 @@ export default {
         },
         loading() {
             return this.$store.getters['services/loading'];
-        }
+        },
     }
 };
 </script>

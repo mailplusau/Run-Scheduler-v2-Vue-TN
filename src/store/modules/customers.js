@@ -1,5 +1,6 @@
 
 import http from '@/utils/http';
+import Vue from 'vue';
 
 const state = {
     data: [],
@@ -28,6 +29,7 @@ const mutations = {
 const actions = {
     init : async context => {
         await _getCustomersByFranchiseeId(context);
+        await _getServiceScheduleReport(context);
     },
     setSelected : async (context, id) => {
         context.commit('setSelected', id);
@@ -43,12 +45,25 @@ async function _getCustomersByFranchiseeId(context) {
 
     context.state.loading = true;
 
-    let {customers} = await http.get('getCustomersByFranchiseeId', {
+    context.state.data = await http.get('getCustomersByFranchiseeId', {
         partnerId: context.rootGetters['franchisees/selected']
     })
 
-    context.state.data = customers
     context.state.loading = false;
+}
+
+async function _getServiceScheduleReport(context) {
+    for (let [index, customer] of context.state.data.entries()) {
+        // request for data
+        let data = await http.get('getServiceScheduleReportByCustomerId', {
+            customerId: customer.internalid
+        })
+
+        let isFullyScheduled = data.reduce((accumulator, item) => parseInt(item.stopCount) >= 2 ? accumulator : accumulator + 1, 0)
+
+        Vue.set(customer, 'serviceScheduleReport', data);
+        Vue.set(customer, 'isFullyScheduled', isFullyScheduled  === 0 && data.length);
+    }
 }
 
 export default {

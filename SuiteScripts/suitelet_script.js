@@ -266,7 +266,6 @@ const getOperations = {
         _writeResponseJson(response, data);
     },
     'getCustomersByFranchiseeId' : function (response, {partnerId}) {
-        let relatedServices = [];
         let customers = [];
 
         NS_MODULES.search.create({
@@ -292,7 +291,54 @@ const getOperations = {
             return true;
         });
 
-        _writeResponseJson(response, {customers, relatedServices});
+        _writeResponseJson(response, customers);
+    },
+    'getServiceScheduleReportByCustomerId' : function (response, {customerId}) {
+        let serviceStops = [];
+        let services = [];
+
+        NS_MODULES.search.create({
+            type: "customrecord_service_stop",
+            filters:
+                [
+                    ["custrecord_1288_customer", "is", customerId],
+                ],
+            columns: ['internalid', 'custrecord_1288_service']
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            serviceStops.push(tmp);
+
+            return true;
+        });
+
+        NS_MODULES.search.create({
+            type: "customrecord_service",
+            filters:
+                [
+                    ["custrecord_service_customer", "is", customerId],
+                    "AND",
+                    ["isinactive", "is", false],
+                    "AND",
+                    ["custrecord_service_category", "is", 1], // Service Category: Services (1)
+                ],
+            columns: [ "internalid", "name" ]
+        }).run().each(result => {
+            let tmp = {};
+            for (let column of result.columns) {
+                tmp[column.name] = result.getValue(column);
+                tmp[column.name + '_text'] = result.getText(column);
+            }
+            tmp['stopCount'] = serviceStops.filter(item => parseInt(item.custrecord_1288_service) === parseInt(result.getValue('internalid'))).length;
+            services.push(tmp);
+
+            return true;
+        });
+
+        _writeResponseJson(response, services);
     },
     'getServicesByCustomerId' : function (response, {customerId}) {
         let data = [];

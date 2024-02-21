@@ -40,9 +40,8 @@
         </template>
 
         <template v-slot:item.isScheduled="{ item }">
-            <v-icon :color="item.isScheduled ? 'green' : 'red'">
-                {{ item.isScheduled ? 'mdi-check' : 'mdi-close'}}
-            </v-icon>
+            <v-icon v-if="item['isFullyScheduled']" color="green">mdi-check</v-icon>
+            <v-icon v-else color="red">mdi-close</v-icon>
         </template>
 
 
