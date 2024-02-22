@@ -45,7 +45,6 @@ const SERVICE_STOP_SCHEMA = {
 
     // TODO: this is related to invoice
     // TODO: job gets created everyday based on this record
-    // TODO:
 }
 
 const testData = [
@@ -211,7 +210,7 @@ const state = {
 
 };
 
-state.ofWeek.data = testData;
+// state.ofWeek.data = testData;
 // state.ofCurrentService.data = testData;
 state.formDialog.form = {...VARS.serviceStopDefault};
 
@@ -306,7 +305,7 @@ const actions = {
     createNewServiceStopOfCurrentService : context => {
         context.state.formDialog.form = {...VARS.serviceStopDefault};
 
-        // TODO: prefill data here
+        // prefill data here
         if (context.rootGetters['services/selectedItem']) {
             let service = context.rootGetters['services/selectedItem'];
             let terms = ['mon', 'tue', 'wed', 'thu', 'fri', 'adhoc'];

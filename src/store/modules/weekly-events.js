@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import {format} from 'date-fns';
+import {mainTabs} from '@/utils/utils.mjs';
 
 const state = {
     colors: ['#2196F3', '#3F51B5', '#673AB7', '#00BCD4',
@@ -25,12 +27,25 @@ const state = {
             x: 0,
             y: 0,
         },
+        timeEditingDialog: {
+            eventId: null,
+            open: false,
+            newStartTime: '',
+            newEndTime: '',
+        },
+        timeSpreadingDialog: {
+            eventId: null,
+            open: false,
+        },
     }
 };
 
 const getters = {
     calendar : state => state.calendar,
     calendarEvents : state => state.calendar.changingEvents,
+    eventContextMenu : state => state.calendar.eventContextMenu,
+    timeEditingDialog : state => state.calendar.timeEditingDialog,
+    timeSpreadingDialog : state => state.calendar.timeSpreadingDialog,
     calendarEventColor : state => event => {
         const rgb = parseInt(event.color.substring(1), 16)
         const r = (rgb >> 16) & 0xFF
@@ -104,10 +119,7 @@ const mutations = {
         let currentEvent = state.calendar.dragEvent || state.calendar.createEvent || null;
         let originalEvent = _getOriginalEventFromEventId(state, currentEvent?.id);
 
-        if (currentEvent && originalEvent && !state.calendar.changedEvents.includes(currentEvent.id) && _areTwoEventsDifferent(currentEvent, originalEvent))
-            state.calendar.changedEvents.push(currentEvent.id);
-        else if (currentEvent && originalEvent && state.calendar.changedEvents.includes(currentEvent.id) && !_areTwoEventsDifferent(currentEvent, originalEvent))
-            state.calendar.changedEvents.splice(state.calendar.changedEvents.indexOf(currentEvent.id), 1);
+        _evaluateEventChanged(state, currentEvent, originalEvent)
 
         state.calendar.dragTime = null
         state.calendar.dragEvent = null
@@ -120,6 +132,30 @@ const mutations = {
     restoreChangingEvents : state => {
         state.calendar.changingEvents = JSON.parse(JSON.stringify(state.calendar.originalEvents));
         state.calendar.changedEvents.splice(0);
+    },
+
+    openTimeEditingDialog : (state, eventId) => {
+        let currentEvent = _getChangingEventFromEventId(state, eventId);
+        if (!currentEvent) return;
+        state.calendar.timeEditingDialog.eventId = eventId;
+        state.calendar.timeEditingDialog.newStartTime = new Date(currentEvent.start).toLocaleTimeString().substring(0, 5);
+        state.calendar.timeEditingDialog.newEndTime = new Date(currentEvent.end).toLocaleTimeString().substring(0, 5);
+        state.calendar.timeEditingDialog.open = true;
+    },
+    applyChangeOfEventTime : (state) => {
+        let data = state.calendar.timeEditingDialog;
+        let currentEvent = _getChangingEventFromEventId(state, data.eventId);
+        let originalEvent = _getOriginalEventFromEventId(state, data.eventId);
+
+        currentEvent.start = new Date(format(new Date(originalEvent.start), "yyyy-MM-dd") + 'T' + data.newStartTime).getTime()
+        currentEvent.end = new Date(format(new Date(originalEvent.end), "yyyy-MM-dd") + 'T' + data.newEndTime).getTime()
+        state.calendar.timeEditingDialog.open = false;
+
+        _evaluateEventChanged(state, currentEvent, originalEvent)
+    },
+    applyEventTimeToAllDays : (state, eventId) => {
+        let currentEvent = _getChangingEventFromEventId(state, eventId);
+        if (!currentEvent) return;
     }
 };
 
@@ -166,7 +202,7 @@ const actions = {
         context.commit('displayBusyGlobalModal', {title: 'Preparing', message: 'Please wait while we retrieve the information...'}, {root: true});
         await context.dispatch('customers/setSelected', event.customerId, {root: true});
         await context.dispatch('services/setSelected', event.serviceId, {root: true});
-        context.commit('goToRoute', 'service-stops', {root: true});
+        context.commit('goToRoute', mainTabs.SERVICE_STOP.id, {root: true});
         context.commit('closeGlobalModal', null, {root: true});
     },
     saveEventChanges : async context => {
@@ -180,7 +216,7 @@ const actions = {
         while(eventId !== undefined) {
             let [internalId, day] = eventId.split('|');
 
-            // TODO: find the original service-stop record
+            // find the original service-stop record
             if (!serviceStopsToUpdate[internalId]) {
                 let index = context.rootGetters['service-stops/ofWeekData'].findIndex(item => parseInt(internalId) === parseInt(item.internalid));
                 if (index >= 0) {
@@ -190,10 +226,10 @@ const actions = {
                 }
             }
 
-            // TODO: find the event item in calendarEvents
+            // find the event item in calendarEvents
             let index = ctxState.calendar.changingEvents.findIndex(item => item.id === eventId);
             if (index >= 0) {
-                // TODO: update service time and stop duration
+                // update service time and stop duration
                 let calendarEvent = ctxState.calendar.changingEvents[index];
                 let serviceTimes = serviceStopsToUpdate[internalId].custrecord_1288_stop_times.split(',');
 
@@ -206,7 +242,7 @@ const actions = {
             eventId = ctxState.calendar.changedEvents.pop();
         }
 
-        // TODO: save to backend
+        // save to backend
         for (let internalId in serviceStopsToUpdate)
             await context.dispatch('service-stops/saveServiceStopData',
                 {serviceStopId: internalId, serviceStopData: serviceStopsToUpdate[internalId]}, {root: true});
@@ -222,6 +258,18 @@ function _areTwoEventsDifferent(eventA, eventB) {
         if (eventA[key] !== eventB[key]) return true;
     
     return false;
+}
+
+function _evaluateEventChanged(state, currentEvent, originalEvent) {
+    if (currentEvent && originalEvent && !state.calendar.changedEvents.includes(currentEvent.id) && _areTwoEventsDifferent(currentEvent, originalEvent))
+        state.calendar.changedEvents.push(currentEvent.id);
+    else if (currentEvent && originalEvent && state.calendar.changedEvents.includes(currentEvent.id) && !_areTwoEventsDifferent(currentEvent, originalEvent))
+        state.calendar.changedEvents.splice(state.calendar.changedEvents.indexOf(currentEvent.id), 1);
+}
+
+function _getChangingEventFromEventId(state, eventId) {
+    let index = state.calendar.changingEvents.findIndex(item => item.id === eventId);
+    return index >= 0 ? state.calendar.changingEvents[index] : null
 }
 
 function _getOriginalEventFromEventId(state, eventId) {

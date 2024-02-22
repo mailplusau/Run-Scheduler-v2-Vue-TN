@@ -35,7 +35,7 @@ export default {
             <v-container fluid>
                 <v-row justify="center">
                     <v-col cols="auto"><v-icon x-large color="green">mdi-information-outline</v-icon></v-col>
-                    <v-col cols="12" class="event-editing-help-texts text-center">
+                    <v-col cols="12" class="text-center">
                         <p>Commit all changes to NetSuite?</p>
                     </v-col>
                     <v-col cols="auto">

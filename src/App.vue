@@ -13,13 +13,15 @@
                 </v-row>
             </v-container>
 
+            <MainTabs />
+
             <v-divider class="mb-3"></v-divider>
 
             <CalendarView />
             <CustomersView />
             <ServiceStopsView />
-
             <WeeklyEventCalendar />
+
         </v-main>
 
         <GlobalNotificationModal />
@@ -32,10 +34,12 @@ import CalendarView from "@/views/calendar/Main.vue";
 import CustomersView from "@/views/customers/Main.vue";
 import ServiceStopsView from "@/views/service-stops/Main.vue";
 import WeeklyEventCalendar from '@/views/calendar/components/WeeklyEventCalendar.vue';
+import MainTabs from '@/views/shared/MainTabs.vue';
 
 export default {
     name: 'App',
     components: {
+        MainTabs,
         WeeklyEventCalendar,
         GlobalNotificationModal,
         CalendarView,

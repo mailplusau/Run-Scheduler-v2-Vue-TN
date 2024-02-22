@@ -4,20 +4,20 @@ import WeeklyEventSidePanel from '@/views/calendar/components/WeeklyEventSidePan
 import WeeklyEventHelpBtn from '@/views/calendar/components/WeeklyEventHelpBtn.vue';
 import WeeklyEventDiscardChangesBtn from '@/views/calendar/components/WeeklyEventDiscardChangesBtn.vue';
 import WeeklyEventSaveChangesBtn from '@/views/calendar/components/WeeklyEventSaveChangesBtn.vue';
+import WeeklyEventCalendarContextMenu from '@/views/calendar/components/WeeklyEventCalendarContextMenu.vue';
+import WeeklyEventTimeEditingDialog from '@/views/calendar/components/WeeklyEventTimeEditingDialog.vue';
+import {mainTabs} from '@/utils/utils.mjs';
 
 export default {
     name: "WeeklyEventCalendar",
     components: {
+        WeeklyEventTimeEditingDialog,
+        WeeklyEventCalendarContextMenu,
         WeeklyEventSaveChangesBtn,
         WeeklyEventDiscardChangesBtn, WeeklyEventHelpBtn, WeeklyEventSidePanel, PageWrapper},
     data: () => ({
         value: '',
         events: [],
-        eventContextMenu: {
-            x: 0,
-            y: 0,
-            clickedEvent: null,
-        },
     }),
     mounted() {
         this.$store.dispatch('weekly-events/generate');
@@ -26,10 +26,12 @@ export default {
         rClickEvent({ nativeEvent, event }) {
             nativeEvent.preventDefault();
             this.$nextTick(() => {
-                this.eventContextMenu.x = nativeEvent.clientX
-                this.eventContextMenu.y = nativeEvent.clientY
+                let eventContextMenu = this.$store.getters['weekly-events/eventContextMenu'];
+                eventContextMenu.open = true;
+                eventContextMenu.x = nativeEvent.clientX;
+                eventContextMenu.y = nativeEvent.clientY;
                 this.$nextTick(() => {
-                    this.eventContextMenu.clickedEvent = event;
+                    eventContextMenu.clickedEvent = event;
                 })
             })
         },
@@ -45,6 +47,9 @@ export default {
         },
     },
     computed: {
+        mainTabs() {
+            return mainTabs
+        },
         editingEventTime() {
             return this.$store.getters['weekly-events/editingEventTime'];
         },
@@ -89,17 +94,8 @@ export default {
 </script>
 
 <template>
-    <PageWrapper page-name="weekly-calendar">
+    <PageWrapper :page-name="mainTabs.WEEKLY_CALENDAR.id">
         <v-row class="fill-height">
-            <v-col cols="12">
-                <v-btn color="primary" @click="$store.commit('goToRoute', 'customers')">
-                    Customer List
-                </v-btn>
-                <v-btn color="primary" class="ml-2" @click="$store.commit('goToRoute', 'calendar')">
-                    Weekly Stops
-                </v-btn>
-            </v-col>
-
             <v-col>
                 <v-sheet>
                     <v-toolbar rounded dense color="primary" dark elevation="5">
@@ -155,7 +151,7 @@ export default {
                     >
                         <template v-slot:event="{ event, timed, eventSummary }">
                             <div :class="'v-event-draggable' + ($store.getters['weekly-events/calendar'].changedEvents.includes(event.id) ? ' selected' : '')">
-                                <strong>{{ event.id }} {{ event.name }}</strong><br>
+                                <strong>{{ event.name }}</strong><br>
                                 {{ formatEventTime(event.start) }} - {{ formatEventTime(event.end) }}
 <!--                                    <component :is="{ render: eventSummary }"></component>-->
                             </div>
@@ -186,29 +182,9 @@ export default {
 
         <WeeklyEventSidePanel />
 
-        <v-menu transition="scale-transition"
-            v-model="eventContextMenuOpen"
-            :position-x="eventContextMenu.x"
-            :position-y="eventContextMenu.y"
-            absolute
-            offset-y
-        >
-            <v-list dense class="background">
-                <v-list-item @click="">
-                    <v-list-item-title>Set time manually</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="">
-                    <v-list-item-title>Apply this time to all days of this stop</v-list-item-title>
-                </v-list-item>
-                <v-list-item>
-                    <v-list-item-title>Click me</v-list-item-title>
-                </v-list-item>
-                <v-divider></v-divider>
-                <v-list-item @click="eventContextMenuOpen = false">
-                    <v-list-item-title class="red--text">Cancel</v-list-item-title>
-                </v-list-item>
-            </v-list>
-        </v-menu>
+        <WeeklyEventCalendarContextMenu />
+
+        <WeeklyEventTimeEditingDialog />
 
         <template v-if="editingEventTime">
             <div class="weekly-calendar-editing-frame2"></div>

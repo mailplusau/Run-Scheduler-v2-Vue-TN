@@ -1,9 +1,6 @@
 <template>
-    <PageWrapper page-name="service-stops">
+    <PageWrapper :page-name="mainTabs.SERVICE_STOP.id">
         <v-row justify="center">
-
-            <v-col cols="12">
-            </v-col>
 
             <v-col cols="12">
                 <v-toolbar flat dense color="primary" dark>
@@ -16,7 +13,7 @@
                     </v-toolbar-title>
                     <v-spacer></v-spacer>
 
-                    <v-btn small @click="$store.commit('navigateBack')" color="white" light class="mr-2" outlined>
+                    <v-btn small @click="goBack" color="white" light class="mr-2" outlined>
                         <v-icon small>mdi-chevron-left</v-icon> go back
                     </v-btn>
                     <v-btn outlined color="secondary" small dark @click.stop="addNewStop">
@@ -60,7 +57,7 @@
             </v-col>
 
             <v-col cols="12">
-                <v-btn color="green darken-2" dark large block @click="finishEditing" :disabled="panel !== undefined">
+                <v-btn color="green darken-2" dark large block @click="goBack">
                     finish editing service stops
                 </v-btn>
             </v-col>
@@ -75,42 +72,17 @@
 import PageWrapper from '@/components/core/PageWrapper.vue';
 import ServiceStopForm from '@/views/service-stops/components/ServiceStopForm.vue';
 import ServiceStopDialog from '@/views/service-stops/components/ServiceStopDialog.vue';
+import {mainTabs} from '@/utils/utils.mjs';
 
 export default {
     name: "Main",
     components: {ServiceStopDialog, ServiceStopForm, PageWrapper},
     data: () => ({
-        panel: undefined,
-        table2data: [
-            {id: 1, name: 'Adelong LPO', duration: 3600},
-            {id: 2, name: 'Test Customer 1', duration: 600},
-        ],
 
-        panelsDisabled: false,
-
-        items: [
-            {
-                color: 'red lighten-2',
-                icon: 'mdi-star',
-            },
-            {
-                color: 'purple darken-1',
-                icon: 'mdi-book-variant',
-            },
-            {
-                color: 'green lighten-1',
-                icon: 'mdi-airballoon',
-            },
-            {
-                color: 'indigo',
-                icon: 'mdi-buffer',
-            },
-        ],
     }),
     methods: {
-        finishEditing() {
-            this.panel = undefined;
-            this.$store.commit('goToRoute', 'customers');
+        goBack() {
+            this.$store.commit('navigateBack');
         },
         editServiceStop(serviceStopId) {
             this.$store.dispatch('service-stops/editServiceStopOfCurrentService', serviceStopId);
@@ -120,6 +92,9 @@ export default {
         }
     },
     computed: {
+        mainTabs() {
+            return mainTabs
+        },
         serviceStops() {
             return this.$store.getters['service-stops/ofCurrentService'].data;
         },
@@ -130,11 +105,6 @@ export default {
             return this.$store.getters['customers/selectedItem'];
         }
     },
-    watch: {
-        panel(val) {
-            this.panelsDisabled = val !== undefined;
-        }
-    }
 };
 </script>
 <style scoped>

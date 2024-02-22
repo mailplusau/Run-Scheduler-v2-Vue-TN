@@ -1,21 +1,21 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import modules from './modules';
-import {getWindowContext, VARS} from '@/utils/utils.mjs';
+import {getWindowContext, mainTabs, VARS} from '@/utils/utils.mjs';
 import http from '@/utils/http';
 
 const baseURL = 'https://' + process.env.VUE_APP_NS_REALM + '.app.netsuite.com';
 
 Vue.use(Vuex)
 
-const routeList = [];
-
 const state = {
     pageTitle: VARS.pageTitle,
 
     standaloneMode: false,
 
+    mainTabDisabled: false,
     route: 'calendar',
+    routeList: [],
     routeScroll: {},
 
     globalModal: {
@@ -36,6 +36,8 @@ const getters = {
     globalModal: state => state.globalModal,
 
     route: state => state.route,
+    routeList: state => state.routeList,
+    mainTabDisabled: state => [mainTabs.SERVICE_STOP.id].includes(state.route) || state.mainTabDisabled,
 };
 
 const mutations = {
@@ -91,8 +93,9 @@ const mutations = {
             parent.setMPTheme(title + ' - NetSuite Australia (Mail Plus Pty Ltd)')
     },
 
+    disableMainTab : (state, disabled = true) => { state.mainTabDisabled = disabled; },
     goToRoute: (state, route) => {
-        routeList.push(state.route);
+        state.routeList.push(state.route);
 
         // save the current scroll position before switching route
         Vue.set(state.routeScroll, state.route, document.getElementsByTagName('html')[0].scrollTop);
@@ -105,11 +108,11 @@ const mutations = {
         }, 200);
     },
     navigateBack : state => {
-        if (routeList.length) {
+        if (state.routeList.length) {
             // save the current scroll position before switching route
             Vue.set(state.routeScroll, state.route, document.getElementsByTagName('html')[0].scrollTop);
 
-            state.route = routeList.pop();
+            state.route = state.routeList.pop();
 
             // restore scroll position on the new route (if any)
             setTimeout(() => {

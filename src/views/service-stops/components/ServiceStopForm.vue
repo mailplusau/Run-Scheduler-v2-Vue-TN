@@ -35,7 +35,6 @@ export default {
             if (!this.$refs.serviceStopForm.validate()) return false;
             if (this.formData.custrecord_1288_frequency === '0,0,0,0,0,0') return false;
             console.log('form valid');
-            // TODO: save form
             this.$store.dispatch('service-stops/save');
         },
         getFreq(index) { // arcane voodoo black magic stuffs

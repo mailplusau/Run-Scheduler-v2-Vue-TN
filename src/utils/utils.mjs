@@ -1,4 +1,27 @@
 
+export const mainTabs = {
+    WEEKLY_STOPS: {
+        id: 'weekly_stops',
+        name: 'Weekly Stops',
+        icon: 'mdi-format-list-bulleted'
+    },
+    WEEKLY_CALENDAR: {
+        id: 'weekly-calendar',
+        icon: 'mdi-calendar',
+        name: 'Weekly Calendar'
+    },
+    CUSTOMER_LIST: {
+        id: 'customers',
+        icon: 'mdi-account-group',
+        name: 'Customer List'
+    },
+    SERVICE_STOP: {
+        id: 'service_stop',
+        icon: 'mdi-account-group',
+        name: 'Service Stop'
+    }
+}
+
 export const VARS = {
     pageTitle: 'Run Scheduler',
     serviceStopDefault: {

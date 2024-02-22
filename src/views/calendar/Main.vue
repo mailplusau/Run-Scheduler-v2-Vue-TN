@@ -1,15 +1,6 @@
 <template>
-    <PageWrapper page-name="calendar">
+    <PageWrapper :page-name="mainTabs.WEEKLY_STOPS.id">
         <v-row justify="center">
-            <v-col cols="12">
-                <v-btn color="primary" @click="$store.commit('goToRoute', 'customers')">
-                    Customer List
-                </v-btn>
-                <v-btn color="primary" class="ml-2" @click="$store.commit('goToRoute', 'weekly-calendar')">
-                    Weekly Calendar
-                </v-btn>
-            </v-col>
-
             <v-col cols="12">
                 <v-card elevation="10" color="background">
                     <v-toolbar flat dense color="primary" dark>
@@ -88,6 +79,7 @@
 <script>
 import PageWrapper from '@/components/core/PageWrapper.vue';
 import ServiceStopForm from '@/views/service-stops/components/ServiceStopForm.vue';
+import {mainTabs} from '@/utils/utils.mjs';
 
 export default {
     name: "Main",
@@ -101,12 +93,15 @@ export default {
             this.$nextTick(async () => {
                 await this.$store.dispatch('customers/setSelected', serviceStop.custrecord_1288_customer);
                 await this.$store.dispatch('services/setSelected', serviceStop.custrecord_1288_service);
-                this.$store.commit('goToRoute', 'service-stops');
+                this.$store.commit('goToRoute', this.mainTabs.SERVICE_STOP.id);
                 this.$store.commit('closeGlobalModal');
             })
         }
     },
     computed: {
+        mainTabs() {
+            return mainTabs
+        },
         serviceDays() {
             return this.$store.getters['service-stops/ofWeek'];
         },

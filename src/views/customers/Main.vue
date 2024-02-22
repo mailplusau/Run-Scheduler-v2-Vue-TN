@@ -1,14 +1,6 @@
 <template>
-    <PageWrapper page-name="customers">
+    <PageWrapper :page-name="mainTabs.CUSTOMER_LIST.id">
         <v-row justify="center">
-            <v-col cols="12">
-                <v-btn color="primary" @click="$store.commit('goToRoute', 'calendar')">
-                    Weekly Stops
-                </v-btn>
-                <v-btn color="primary" class="ml-2" @click="$store.commit('goToRoute', 'weekly-calendar')">
-                    Weekly Calendar
-                </v-btn>
-            </v-col>
             <v-col lg="7" cols="6">
                 <CustomerTable />
             </v-col>
@@ -25,9 +17,15 @@
 import PageWrapper from '@/components/core/PageWrapper.vue';
 import CustomerTable from '@/views/customers/components/CustomerTable.vue';
 import ServiceTable from '@/views/customers/components/ServiceTable.vue';
+import {mainTabs} from '@/utils/utils.mjs';
 
 export default {
     name: "Main",
+    computed: {
+        mainTabs() {
+            return mainTabs
+        }
+    },
     components: {ServiceTable, CustomerTable, PageWrapper},
     data: () => ({
         sidePanel: true,
