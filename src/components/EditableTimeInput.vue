@@ -75,6 +75,9 @@ export default {
         timeMenu: false,
         enteredTime: '09:00',
     }),
+    mounted() {
+        this.enteredTime = this.value;
+    },
     methods: {
         validateEnteredTime() {
             let [strHour, strMinute] = this.enteredTime.split(':');
