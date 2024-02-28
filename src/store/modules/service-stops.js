@@ -248,7 +248,7 @@ const getters = {
                         eventStart: eventTime.getTime(),
                         eventEnd: addMinutes(eventTime, 30).getTime(),
                         stopTime, stopDuration,
-                        address: rootGetters['addresses/getFormattedAddress'](parseInt(stop.custrecord_1288_address_type), stop),
+                        address: rootGetters['addresses/getAddressObject'](parseInt(stop.custrecord_1288_address_type), stop).formatted,
                         addressType: addressTypes[parseInt(stop.custrecord_1288_address_type) - 1]
                     });
                 }

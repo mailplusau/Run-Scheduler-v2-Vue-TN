@@ -84,7 +84,7 @@ export default {
             let addressType = parseInt(this.$store.getters['service-stops/formDialog'].form.custrecord_1288_address_type);
             let tmp = ['Manually Entered: ', 'Address Book: ', 'Postal Location: ']
             let str1 = tmp[addressType - 1]
-            let str2 = this.$store.getters['addresses/getFormattedAddress'](addressType, this.$store.getters['service-stops/formDialog'].form)
+            let str2 = this.$store.getters['addresses/getAddressObject'](addressType, this.$store.getters['service-stops/formDialog'].form).formatted
             return str2 ? str1 + str2 : '';
         },
         manualForm() {

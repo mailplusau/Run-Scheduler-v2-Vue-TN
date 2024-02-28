@@ -34,7 +34,7 @@
                             <v-col cols="8">
                                 <b class="primary--text">Service stop: {{serviceStop.custrecord_1288_stop_name}}</b><br>
                                 <span class="subtitle-2">
-                                    Address: {{$store.getters['addresses/getFormattedAddress'](parseInt(serviceStop.custrecord_1288_address_type), serviceStop)}}
+                                    Address: {{$store.getters['addresses/getAddressObject'](parseInt(serviceStop.custrecord_1288_address_type), serviceStop).formatted}}
                                 </span><br>
                                 <span class="caption grey--text lighten-1">
                                     Notes:
