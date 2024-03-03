@@ -6,7 +6,7 @@ export const mainTabs = {
         icon: 'mdi-format-list-bulleted'
     },
     WEEKLY_CALENDAR: {
-        id: 'weekly-calendar',
+        id: 'weekly_calendar',
         icon: 'mdi-calendar',
         name: 'Weekly Calendar'
     },
@@ -19,6 +19,11 @@ export const mainTabs = {
         id: 'service_stop',
         icon: 'mdi-account-group',
         name: 'Service Stop'
+    },
+    SERVICE_MAP: {
+        id: 'service_map',
+        icon: 'mdi-map',
+        name: 'Service Map'
     }
 }
 

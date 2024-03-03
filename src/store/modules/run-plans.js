@@ -27,9 +27,9 @@ const actions = {
     init : async context => {
         await _getPlansByFranchiseeId(context);
     },
-    setSelected : (context, id) => {
+    setSelected : async (context, id) => {
         context.commit('setSelected', id);
-        context.dispatch('service-stops/init', null, {root: true}).then();
+        await context.dispatch('service-stops/init', null, {root: true});
     }
 };
 

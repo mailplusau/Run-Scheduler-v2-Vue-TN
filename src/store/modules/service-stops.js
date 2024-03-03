@@ -45,6 +45,8 @@ const SERVICE_STOP_SCHEMA = {
 
     // TODO: this is related to invoice
     // TODO: job gets created everyday based on this record
+    // TODO: integrate google map to visualize routes
+    // TODO: apply relief driver on plan level
 }
 
 const testData = [

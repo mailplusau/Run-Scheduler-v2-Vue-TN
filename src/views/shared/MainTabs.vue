@@ -8,6 +8,7 @@ export default {
             mainTabs.WEEKLY_STOPS,
             mainTabs.WEEKLY_CALENDAR,
             mainTabs.CUSTOMER_LIST,
+            mainTabs.SERVICE_MAP,
         ]
     }),
     computed: {
