@@ -4,6 +4,82 @@ import {baseURL, mainTabs} from '@/utils/utils.mjs';
 
 let directionsService, googleMap;
 let weekDays = [];
+let territories = []
+const mapStyleJson = [
+    {
+        "featureType": "poi.attraction",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.business",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.government",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.medical",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.park",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "labels.icon",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.place_of_worship",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.school",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.sports_complex",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            }
+        ]
+    }
+];
 
 const mapCenterTextDisplayId = 'custom_map_control_text_display'
 let mapCenterTextDisplayElement;
@@ -176,19 +252,17 @@ const actions = {
             center: {
                 lat: -33.8685466,
                 lng: 151.2054126
-            }
+            },
+            styles: mapStyleJson,
         });
-
-        // google.maps.event.addListener(googleMap, 'click', function(...args) {
-        //     console.log('clicked on map')
-        //     console.log(JSON.stringify(args))
-        // });
 
         directionsService = new google.maps.DirectionsService();
 
+        await context.dispatch('getTerritoryMap');
         _displayMessageOnMapCenter('');
     },
     getTerritoryMap : async context => {
+        console.log('getTerritoryMap')
         let json = await http.get('getTerritoryPolygons');
 
         for (let feature of json.features) {
@@ -251,6 +325,18 @@ const actions = {
             // Set map for renders
             if (weekDay.visual) weekDay.visual['setMap'](context.state.settingsPanel.selectedDays.includes(index) ? googleMap : null);
         }
+    },
+    goToEditServiceStop : async (context, {customerId, serviceId}) => {
+        console.log('goToEditServiceStop', customerId, serviceId)
+        context.commit('displayBusyGlobalModal', {title: 'Preparing', message: 'Please wait while we retrieve the information...'}, {root: true});
+        context.state.settingsPanel.open = false;
+        await context.dispatch('customers/setSelected', customerId, {root: true});
+        await context.dispatch('services/setSelected', serviceId, {root: true});
+        context.commit('goToRoute', mainTabs.SERVICE_STOP.id, {root: true});
+        context.commit('closeGlobalModal', {}, {root: true});
+    },
+    clearData : context => {
+
     }
 };
 
@@ -277,7 +363,25 @@ function _waitForSeconds(seconds = 1) {
 }
 
 function _displayWaypointInfo(context, stop) {
-    context.commit('displayInfoGlobalModal', {title: 'test', message: JSON.stringify(stop)}, {root: true});
+    context.commit('displayInfoGlobalModal', {title: `${stop.custrecord_1288_stop_name} at ${stop.custrecord_1288_postal_location_text}`, message: `
+        <p class="my-1"><b>Customer:</b> <a target="_blank" href="${baseURL}/app/common/entity/custjob.nl?id=${stop.custrecord_1288_customer}">${stop.custrecord_1288_customer_text}</a></p>
+        <p class="my-1"><b>Service name:</b> ${stop.custrecord_1288_service_text}</p>
+        <p class="my-1"><b>Stop time:</b> ${stop.stopTime}</p>
+        <p class="my-1"><b>Notes:</b> ${stop.custrecord_1288_notes || 'None provided'}</p>
+        <p class="my-1"><b>Address:</b> ${stop.addressObj.formatted}</p>
+    `, maxWidth: 450, buttons: [
+            'spacer',
+            {
+                action: 'map/goToEditServiceStop',
+                text: 'edit this stop',
+                color: 'primary',
+                params: {customerId: stop.custrecord_1288_customer, serviceId: stop.custrecord_1288_service}
+            },
+            {
+                text: 'okay',
+                color: 'green darken-1',
+            },
+        ]}, {root: true});
 }
 
 function _displayMessageOnMapCenter(message = '') {

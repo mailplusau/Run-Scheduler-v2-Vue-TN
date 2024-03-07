@@ -43,7 +43,7 @@ export default {
 
             <v-col cols="12" class="shrink">
                 <v-toolbar color="primary" dense dark>
-                    <v-btn icon><v-icon>mdi-arrow-left</v-icon></v-btn>
+                    <v-btn icon @click="$store.commit('navigateBack')"><v-icon>mdi-arrow-left</v-icon></v-btn>
 
                     <v-toolbar-title>Route Map</v-toolbar-title>
 

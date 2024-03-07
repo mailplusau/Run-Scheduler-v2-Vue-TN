@@ -3,28 +3,26 @@
         <v-main class="fill-height">
             <ServiceMapView v-show="$store.getters['route'] === mainTabs.SERVICE_MAP.id" />
 
-            <template v-if="$store.getters['route'] !== mainTabs.SERVICE_MAP.id">
-                <v-container fluid>
-                    <v-row class="mx-1" justify="space-between" align="center">
-                        <v-col cols="auto">
-                            <h2 class="primary--text" v-html="pageTitle"></h2>
-                        </v-col>
+            <v-container v-show="$store.getters['route'] !== mainTabs.SERVICE_MAP.id" fluid>
+                <v-row class="mx-1" justify="space-between" align="center">
+                    <v-col cols="auto">
+                        <h2 class="primary--text" v-html="pageTitle"></h2>
+                    </v-col>
 
-                        <v-col cols="auto">
-                            <a @click="$store.dispatch('addShortcut')" class="subtitle-1">Add To Shortcuts <v-icon size="20" color="primary">mdi-open-in-new</v-icon></a>
-                        </v-col>
-                    </v-row>
-                </v-container>
+                    <v-col cols="auto">
+                        <a @click="$store.dispatch('addShortcut')" class="subtitle-1">Add To Shortcuts <v-icon size="20" color="primary">mdi-open-in-new</v-icon></a>
+                    </v-col>
+                </v-row>
+            </v-container>
 
-                <MainTabs />
+            <MainTabs v-show="$store.getters['route'] !== mainTabs.SERVICE_MAP.id" />
 
-                <v-divider class="mb-3"></v-divider>
+            <v-divider v-show="$store.getters['route'] !== mainTabs.SERVICE_MAP.id" class="mb-3"></v-divider>
 
-                <CalendarView />
-                <CustomersView />
-                <ServiceStopsView />
-                <WeeklyEventCalendar />
-            </template>
+            <CalendarView />
+            <CustomersView />
+            <ServiceStopsView />
+            <WeeklyEventCalendar />
 
         </v-main>
 

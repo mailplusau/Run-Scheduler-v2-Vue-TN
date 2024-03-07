@@ -50,9 +50,7 @@ export default {
             },
             set(val) {
                 this.$store.getters['map/settingsPanel'].dataLoading = true;
-                this.$store.dispatch('run-plans/setSelected', val).then(() => {
-                    this.$store.dispatch('map/displayRoutesOfSelectedRunPlan');
-                });
+                this.$store.dispatch('run-plans/setSelected', val);
             }
         },
         runPlanLoading() {
@@ -77,7 +75,7 @@ export default {
 <template>
     <v-navigation-drawer :app="isVisible"
                          :permanent="isVisible"
-                         fixed right floating
+                         fixed right floating hide-overlay
                          class="background map-side-panel"
                          v-model="drawer">
 
@@ -125,13 +123,13 @@ export default {
 
             <v-divider></v-divider>
 
-            <v-subheader>Routes -{{selectedWeekDays}}-</v-subheader>
+            <v-subheader>Routes -{{runPlan}}-</v-subheader>
 
             <v-list-item-group v-model="selectedWeekDays"
                 multiple active-class="">
 
                 <template v-for="weekDay of $store.getters['map/weeklyStopData']">
-                    <v-list-item v-if="[1, 2, 3, 4, 5].includes(weekDay.day)" :disabled="dataLoading">
+                    <v-list-item v-if="[1, 2, 3, 4, 5].includes(weekDay.day)" :disabled="dataLoading || !runPlan">
                         <template v-slot:default="{ active }">
                             <v-list-item-action>
                                 <v-checkbox :input-value="active"></v-checkbox>
@@ -145,6 +143,13 @@ export default {
                 </template>
 
             </v-list-item-group>
+
+            <v-list-item>
+                <v-btn block small v-if="territoryMarkings.show" :disabled="territoryMarkings.processing"
+                       @click="$store.dispatch('map/showTerritoryMarkings', false)">Hide territories</v-btn>
+                <v-btn block small v-else :disabled="territoryMarkings.processing"
+                       @click="$store.dispatch('map/showTerritoryMarkings', true)">Show territories</v-btn>
+            </v-list-item>
 
             <v-divider></v-divider>
 
