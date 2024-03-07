@@ -4,7 +4,11 @@ import {mainTabs} from '@/utils/utils.mjs';
 
 const state = {
     colors: ['#2196F3', '#3F51B5', '#673AB7', '#00BCD4',
-        '#4CAF50', '#3d8640', '#5c7a2e', '#41bb79'],
+        '#4CAF50', '#3d8640', '#5c7a2e', '#41bb79',
+        '#934caf', '#763d86', '#672e7a', '#cd65d9',
+        '#af934c', '#86753d', '#7a572e', '#d9be65',
+        '#af4c4f', '#863d3d', '#7a2e3c', '#d96565',
+        '#4caf60', '#3d8680', '#2e587a', '#6574d9'],
     calendar: {
         settingsPanel: false,
         intervalHeight: 48,
@@ -179,7 +183,7 @@ const actions = {
             for (let [index, stop] of serviceDay.stops?.entries()) {
                 let color = ctxState.calendar.stopColors[stop.internalid] || _getRandomElementOfArray(colors);
                 ctxState.calendar.stopColors[stop.internalid] = color;
-                colors.splice(colors.indexOf(color), 1);
+                if (colors.indexOf(color) >= 0) colors.splice(colors.indexOf(color), 1);
 
                 let eventDate = new Date(stop.eventStart);
                 ctxState.calendar.originalEvents.push({
