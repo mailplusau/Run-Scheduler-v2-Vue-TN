@@ -71,6 +71,12 @@ const getters = {
         let newObj = {};
         newObj[state.picker.postalLocationId] = '';
         state.cache.customerAddresses = Object.assign(state.cache.customerAddresses, newObj)
+
+        let postalLocation = state.picker.postalLocations[index];
+        if (postalLocation)
+            postalLocation['fullAddress'] = `${postalLocation.custrecord_ap_lodgement_addr1} ${postalLocation.custrecord_ap_lodgement_addr2},` +
+                ` ${postalLocation.custrecord_ap_lodgement_suburb} ${postalLocation.custrecord_ap_lodgement_site_state} ${postalLocation.custrecord_ap_lodgement_postcode}`;
+
         return index >= 0 ? state.picker.postalLocations[index] : {};
     },
     selectedCustomerAddress : state => {

@@ -224,6 +224,12 @@ export default {
                                                             :rules="[v => panel !== 1 || validate(v, 'required')]"
                                                             item-value="internalid" item-text="name"></v-autocomplete>
                                         </v-col>
+                                        <v-col cols="12">
+                                            <v-text-field label="Full Address" v-model="selectedPostalLocation.fullAddress"
+                                                          dense disabled
+                                                          :rules="[v => panel !== 1 || validate(v, 'required')]"
+                                            ></v-text-field>
+                                        </v-col>
                                         <v-col cols="6">
                                             <v-text-field label="City" v-model="selectedPostalLocation.custrecord_ap_lodgement_suburb"
                                                           dense disabled
