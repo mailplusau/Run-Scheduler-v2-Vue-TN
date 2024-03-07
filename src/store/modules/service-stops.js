@@ -1,4 +1,4 @@
-import {getDay, addDays, format, addMinutes} from 'date-fns';
+import {getDay, addDays, format, addMilliseconds} from 'date-fns';
 import http from '@/utils/http';
 import {VARS} from '@/utils/utils.mjs';
 
@@ -247,7 +247,7 @@ const getters = {
                     obj[index].stops.push({
                         ...stop,
                         eventStart: eventTime.getTime(),
-                        eventEnd: addMinutes(eventTime, 30).getTime(),
+                        eventEnd: addMilliseconds(eventTime, parseInt(stopDuration)).getTime(),
                         stopTime, stopDuration,
                         address: rootGetters['addresses/getAddressObject'](parseInt(stop.custrecord_1288_address_type), stop).formatted,
                         addressType: addressTypes[parseInt(stop.custrecord_1288_address_type) - 1]
@@ -317,7 +317,7 @@ const actions = {
 
             // pre-fill frequency, service time and stop duration
             context.state.formDialog.form.custrecord_1288_frequency = terms.map(term => !!service[`custrecord_service_day_${term}`] ? 1 : 0).join(',');
-            context.state.formDialog.form.custrecord_1288_stop_times = terms.map(() => '07:00|600').join(',');
+            context.state.formDialog.form.custrecord_1288_stop_times = terms.map(() => '07:00|300000').join(',');
 
             context.state.formDialog.serviceTime = 0;
         }
@@ -372,7 +372,7 @@ const actions = {
         }, {root: true});
 
         _getServiceStopsBySelectedPlan(context).then();
-        context.dispatch('customers/getServiceScheduleReport').then();
+        context.dispatch('customers/getServiceScheduleReport', null, {root: true}).then();
     },
     saveServiceStopData : async (context, {serviceStopId, serviceStopData}) => {
         await http.post('saveServiceStop', {serviceStopId, serviceStopData});

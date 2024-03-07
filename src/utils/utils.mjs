@@ -38,7 +38,7 @@ export const VARS = {
         custrecord_1288_operator: null,
         custrecord_1288_stop_name: '',
         custrecord_1288_frequency: '0,0,0,0,0,0',
-        custrecord_1288_stop_times: '9:00|1800,9:00|1800,9:00|1800,9:00|1800,9:00|1800,9:00|1800',
+        custrecord_1288_stop_times: '9:00|300000,9:00|300000,9:00|300000,9:00|300000,9:00|300000,9:00|300000',
         custrecord_1288_notes: '',
         custrecord_1288_sequence: 0,
         custrecord_1288_is_transfer: '2', // Yes (1), No (2)

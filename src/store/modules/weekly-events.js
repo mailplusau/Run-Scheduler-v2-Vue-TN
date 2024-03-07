@@ -11,7 +11,7 @@ const state = {
         '#4caf60', '#3d8680', '#2e587a', '#6574d9'],
     calendar: {
         settingsPanel: false,
-        intervalHeight: 48,
+        intervalHeight: 264,
 
         stopColors: {},
         changingEvents: [],

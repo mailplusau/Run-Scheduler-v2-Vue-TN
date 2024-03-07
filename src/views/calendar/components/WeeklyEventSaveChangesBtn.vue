@@ -7,7 +7,7 @@ export default {
     }),
     methods: {
         proceed() {
-            this.$store.commit('weekly-events/saveEventChanges');
+            this.$store.dispatch('weekly-events/saveEventChanges');
             this.dialog = false;
         },
     },
