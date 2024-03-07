@@ -18,7 +18,8 @@ export const mainTabs = {
     SERVICE_STOP: {
         id: 'service_stop',
         icon: 'mdi-account-group',
-        name: 'Service Stop'
+        name: 'Service Stop',
+        hidden: true,
     },
     SERVICE_MAP: {
         id: 'service_map',

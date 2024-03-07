@@ -1,4 +1,6 @@
 <script>
+import {mainTabs} from '@/utils/utils.mjs';
+
 export default {
     name: "WeeklyEventSidePanel",
     data: () => ({
@@ -11,6 +13,9 @@ export default {
         },
     },
     computed: {
+        mainTabs() {
+            return mainTabs
+        },
         drawer: {
             get() {
                 return this.$store.getters['weekly-events/calendar'].settingsPanel;
@@ -105,25 +110,22 @@ export default {
 
             <v-subheader>Navigations</v-subheader>
 
-            <v-list-item link @click="goToRoute('customers')">
-                <v-list-item-icon>
-                    <v-icon>mdi-account</v-icon>
-                </v-list-item-icon>
+            <template v-for="mainTab in Object.keys(mainTabs)">
 
-                <v-list-item-content>
-                    <v-list-item-title>Customer List</v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
+                <v-list-item v-show="!mainTabs[mainTab].hidden" link
+                             @click="goToRoute(mainTabs[mainTab].id)"
+                             :disabled="mainTabs[mainTab].id === $store.getters['route']">
 
-            <v-list-item link @click="goToRoute('calendar')">
-                <v-list-item-icon>
-                    <v-icon>mdi-calendar</v-icon>
-                </v-list-item-icon>
+                    <v-list-item-icon>
+                        <v-icon>{{mainTabs[mainTab].icon}}</v-icon>
+                    </v-list-item-icon>
 
-                <v-list-item-content>
-                    <v-list-item-title>Weekly Stops</v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
+                    <v-list-item-content>
+                        <v-list-item-title>{{mainTabs[mainTab].name}}</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+
+            </template>
 
         </v-list>
     </v-navigation-drawer>
