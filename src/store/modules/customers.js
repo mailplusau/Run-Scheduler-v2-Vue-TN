@@ -53,16 +53,24 @@ async function _getCustomersByFranchiseeId(context) {
 }
 
 async function _getServiceScheduleReport(context) {
-    for (let [index, customer] of context.state.data.entries()) {
-        // request for data
-        let data = await http.get('getServiceScheduleReportByCustomerId', {
-            customerId: customer.internalid
-        })
+    let executionArray = []
+    let getReportForCustomerId = async (customerId, customer) => {
+        let data = await http.get('getServiceScheduleReportByCustomerId', {customerId})
 
         let isFullyScheduled = data.reduce((accumulator, item) => parseInt(item.stopCount) >= 2 ? accumulator : accumulator + 1, 0)
 
         Vue.set(customer, 'serviceScheduleReport', data);
         Vue.set(customer, 'isFullyScheduled', isFullyScheduled  === 0 && data.length);
+    }
+
+    for (let [index, customer] of context.state.data.entries()) {
+        // request for data
+        executionArray.push(getReportForCustomerId(customer.internalid, customer));
+
+        if (executionArray.length > 100) {
+            await Promise.allSettled(executionArray);
+            executionArray.splice(0);
+        }
     }
 }
 
