@@ -60,6 +60,10 @@ const getters = {
 };
 
 const mutations = {
+    clearData : state => {
+        state.calendar.originalEvents.splice(0);
+        state.calendar.changingEvents.splice(0);
+    },
     startTimer : (state, calendarTime) => {
         const mouse = _convertCalendarTimeToMilliseconds(calendarTime)
 

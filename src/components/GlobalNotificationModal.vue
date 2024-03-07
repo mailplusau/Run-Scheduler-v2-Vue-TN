@@ -29,7 +29,7 @@
                     <v-btn v-else-if="typeof button === 'object'" :key="'button' + index"
                            :color="button.color || 'green darken-1'"
                            text
-                           @click="() => { if (button.action) $store.dispatch(button.action); else dialog = false;}"
+                           @click="() => { if (button.action) $store.dispatch(button.action, button.params); else dialog = false;}"
                            :disabled="globalModal.busy"
                     >
                         {{ button.text}}

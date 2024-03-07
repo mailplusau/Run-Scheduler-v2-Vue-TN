@@ -45,7 +45,6 @@ const SERVICE_STOP_SCHEMA = {
 
     // TODO: this is related to invoice
     // TODO: job gets created everyday based on this record
-    // TODO: integrate google map to visualize routes
     // TODO: apply relief driver on plan level
 }
 
@@ -297,11 +296,9 @@ const actions = {
     getDataBySelectedService : async context => {
         if (!context.rootGetters['services/selected']) return;
 
-        context.commit('displayBusyGlobalModal', {title: 'Processing', message: 'Retrieving information. Please wait :)'}, {root: true});
         context.state.ofCurrentService.loading = true;
         context.state.ofCurrentService.data = await http.get('getServiceStopsByServiceId', {serviceId: context.rootGetters['services/selected']});
         context.state.ofCurrentService.loading = false;
-        context.commit('closeGlobalModal', null, {root: true});
     },
 
     createNewServiceStopOfCurrentService : context => {
@@ -363,6 +360,8 @@ const actions = {
             serviceStopData
         });
 
+        context.commit('displayBusyGlobalModal', {title: 'Processing', message: 'Retrieving information. Please wait :)'}, {root: true});
+
         await context.dispatch('getDataBySelectedService');
 
         context.state.formDialog.open = false;
@@ -384,7 +383,10 @@ async function _getServiceStopsBySelectedPlan(context) {
 
     context.state.ofWeek.loading = true;
     context.state.ofWeek.data = await http.get('getServiceStopsByPlanId', {planId: context.rootGetters['run-plans/selected']});
-    context.dispatch('weekly-events/generate', null, {root: true}).then();
+    await Promise.allSettled([
+        context.dispatch('weekly-events/generate', null, {root: true}),
+        context.dispatch('map/displayRoutesOfSelectedRunPlan', null, {root: true})
+    ])
     context.state.ofWeek.loading = false;
 }
 

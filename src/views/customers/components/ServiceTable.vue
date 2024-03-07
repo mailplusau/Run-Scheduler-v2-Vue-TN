@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import {mainTabs} from '@/utils/utils.mjs';
+
 export default {
     name: "ServiceTable",
     data: () => ({
@@ -46,14 +48,18 @@ export default {
     methods: {
         handleServiceDetailClick(e, v) {
             this.$store.dispatch('services/setSelected', v.item.internalid);
-            this.$store.commit('goToRoute', 'service-stops');
+            this.$store.commit('goToRoute', this.mainTabs.SERVICE_STOP.id);
         },
         isScheduled(serviceId) {
+            if (!this.customer['serviceScheduleReport'] || !this.customer['serviceScheduleReport']?.length) return false;
             let index = this.customer['serviceScheduleReport'].findIndex(item => parseInt(item.internalid) === parseInt(serviceId));
             return this.customer['serviceScheduleReport'][index]?.stopCount && parseInt(this.customer['serviceScheduleReport'][index]?.stopCount) >= 2;
         }
     },
     computed: {
+        mainTabs() {
+            return mainTabs
+        },
         customer() {
             return this.$store.getters['customers/selectedItem']
         },

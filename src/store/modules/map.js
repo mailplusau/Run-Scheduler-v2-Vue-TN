@@ -46,6 +46,13 @@ const mutations = {
 const actions = {
     displayRoutesOfSelectedRunPlan : async context => {
         context.state.settingsPanel.dataLoading = true;
+
+        // clean up previous data if any
+        for (let weekDay of weekDays) {
+            for (let marker of weekDay.mapMarkers) marker['setMap'](null);
+            if (weekDay.visual) weekDay.visual['setMap'](null);
+        }
+
         let serviceStops = context.rootGetters['service-stops/ofWeekData'];
         let today = getDay(new Date());
 
@@ -152,6 +159,9 @@ const actions = {
                 }
             });
         });
+
+        await context.dispatch('handleSelectedWeekDaysChanged');
+        await _waitForSeconds(0.15);
 
         context.state.settingsPanel.dataLoading = false;
     },

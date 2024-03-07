@@ -24,9 +24,11 @@ const actions = {
         context.commit('setSelected', id);
         context.commit('services/clearData', null, {root: true});
         context.commit('service-stops/clearDataOfWeek', null, {root: true});
+        context.commit('weekly-events/clearData', null, {root: true});
         context.dispatch('run-plans/init', null, {root: true}).then();
         context.dispatch('customers/init', null, {root: true}).then();
         context.dispatch('operators/setFranchiseeForPicker', id, {root: true}).then();
+        context.dispatch('map/displayRoutesOfSelectedRunPlan', null, {root: true}).then();
     }
 };
 

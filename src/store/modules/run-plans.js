@@ -20,11 +20,12 @@ const getters = {
 };
 
 const mutations = {
-    setSelected : (state, id) => state.selected = id,
+    setSelected : (state, id) => { state.selected = id; console.log('run-plans/setSelected', id)},
 };
 
 const actions = {
     init : async context => {
+        context.commit('setSelected', null);
         await _getPlansByFranchiseeId(context);
     },
     setSelected : async (context, id) => {
