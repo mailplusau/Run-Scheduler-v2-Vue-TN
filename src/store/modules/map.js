@@ -1,6 +1,8 @@
 import {addDays, format, getDay} from 'date-fns';
+import http from '@/utils/http';
+import {baseURL, mainTabs} from '@/utils/utils.mjs';
 
-let directionsService, directionsRenderer, googleMap;
+let directionsService, googleMap;
 let weekDays = [];
 
 const mapCenterTextDisplayId = 'custom_map_control_text_display'
@@ -24,6 +26,10 @@ const state = {
         open: false,
         dataLoading: false,
         selectedDays: [],
+        territoryMarkings: {
+            show: true,
+            processing: false,
+        }
     }
 };
 
@@ -171,6 +177,60 @@ const actions = {
         directionsService = new google.maps.DirectionsService();
 
         _displayMessageOnMapCenter('');
+    },
+    getTerritoryMap : async context => {
+        let json = await http.get('getTerritoryPolygons');
+
+        for (let feature of json.features) {
+            if (!feature?.['geometry']?.['coordinates']?.length || !feature?.['properties']?.['Name']) continue;
+
+            let invalidCoords = false;
+            let paths = feature?.['geometry']?.['coordinates'][0].map(item => {
+                let [lng, lat] = item;
+                if (isNaN(lng) || isNaN(lat)) invalidCoords = true
+                return isNaN(lng) || isNaN(lat) ? null : new google.maps.LatLng(lat, lng);
+            })
+
+            if (invalidCoords) continue;
+
+            let territoryName = `${feature['properties']['Territory'] || feature['properties']['Name']} (${feature['properties']['State']})`
+
+            let polygon = new google.maps.Polygon({
+                paths,
+                strokeColor: "#ff0000",
+                strokeOpacity: 0.2,
+                strokeWeight: 2,
+                fillColor: "#ff5959",
+                fillOpacity: 0.1,
+            });
+            polygon.addListener('mouseover', () => {
+                _displayMessageOnMapCenter(`Territory: ${territoryName}`)
+                polygon['setOptions']({strokeOpacity: 0.1});
+                polygon['setOptions']({fillOpacity: 0.5});
+            });
+
+            polygon.addListener('mouseout', () => {
+                _displayMessageOnMapCenter('')
+                polygon['setOptions']({strokeOpacity: 0.2});
+                polygon['setOptions']({fillOpacity: 0.1});
+            });
+            polygon['setMap'](googleMap);
+
+            territories.push({
+                text: territoryName,
+                ...feature['properties'],
+                polygon
+            })
+        }
+    },
+    showTerritoryMarkings : (context, show = true) => {
+        context.state.settingsPanel.territoryMarkings.processing = true;
+        context.state.settingsPanel.territoryMarkings.show = show;
+
+        for (let territory of territories)
+            territory.polygon['setMap'](show ? googleMap : null);
+
+        context.state.settingsPanel.territoryMarkings.processing = false;
     },
     handleSelectedWeekDaysChanged : context => {
         for (let [index, weekDay] of weekDays.entries()) {

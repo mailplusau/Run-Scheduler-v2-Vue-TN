@@ -13,6 +13,9 @@ export default {
         },
     },
     computed: {
+        territoryMarkings() {
+            return this.$store.getters['map/settingsPanel'].territoryMarkings;
+        },
         isVisible() {
             return this.$store.getters['route'] === mainTabs.SERVICE_MAP.id && this.drawer
         },
