@@ -37,6 +37,9 @@ const actions = {
             context.dispatch('services/init', null, {root: true}),
             context.dispatch('addresses/init', null, {root: true})
         ])
+    },
+    getServiceScheduleReport : async context => {
+        await _getServiceScheduleReport(context);
     }
 };
 

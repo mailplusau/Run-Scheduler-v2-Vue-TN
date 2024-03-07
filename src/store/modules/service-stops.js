@@ -372,6 +372,7 @@ const actions = {
         }, {root: true});
 
         _getServiceStopsBySelectedPlan(context).then();
+        context.dispatch('customers/getServiceScheduleReport').then();
     },
     saveServiceStopData : async (context, {serviceStopId, serviceStopData}) => {
         await http.post('saveServiceStop', {serviceStopId, serviceStopData});
