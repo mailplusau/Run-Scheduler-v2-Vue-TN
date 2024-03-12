@@ -84,7 +84,7 @@ export default {
             let hour = parseInt(strHour);
             let minute = parseInt(strMinute);
 
-            return (!isNaN(hour) && !isNaN(minute) && hour >= 0 && minute >= 0 && hour <= 23 && minute <= 59) ||
+            return (/^\d{2}:\d{2}$/.test(this.enteredTime) && hour >= 0 && minute >= 0 && hour <= 23 && minute <= 59) ||
                 'Invalid time format. Must be HH:MM (24 hours).';
         },
         parseEnteredTime() {
