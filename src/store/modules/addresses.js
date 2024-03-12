@@ -18,33 +18,15 @@ let storeContext;
 const state = {
     picker: {
         loading: false,
-        type: 1,
-        typeOptions: [
-            {text: 'Manual', value: 1},
-            {text: 'Book', value: 2},
-            {text: 'Postal', value: 3},
-        ],
 
         customerAddressId: null,
         customerAddresses: [],
 
-
-        postalStateId: null,
-        postalStates: [
-            {value: 1, text: 'NSW'},
-            {value: 2, text: 'QLD'},
-            {value: 3, text: 'VIC'},
-            {value: 4, text: 'SA'},
-            {value: 5, text: 'TAS'},
-            {value: 6, text: 'ACT'},
-            {value: 7, text: 'WA'},
-            {value: 8, text: 'NT'},
-            {value: 9, text: 'NZ'},
-        ],
-        postalLocationLoading: false,
-        postalLocationId: null,
-        postalLocations: [],
-
+        locationTypeId: null,
+        locationStateId: null,
+        locationLoading: false,
+        locationId: null,
+        locationOptions: [],
 
         manualForm: {}
     },
@@ -52,7 +34,7 @@ const state = {
     cache: {
         queue: [],
         customerAddresses: {},
-        postalLocations: {},
+        locationOptions: {},
         tries: {},
         running: false,
     }
@@ -64,20 +46,20 @@ const getters = {
     picker : state => state.picker,
     cache : state => state.cache,
 
-    selectedPostalLocation : state => {
-        if (!state.picker.postalLocationId) return {};
+    selectedLocation : state => {
+        if (!state.picker.locationId) return {};
 
-        let index = state.picker.postalLocations.findIndex(item => item.internalid === state.picker.postalLocationId);
+        let index = state.picker.locationOptions.findIndex(item => item.internalid === state.picker.locationId);
         let newObj = {};
-        newObj[state.picker.postalLocationId] = '';
+        newObj[state.picker.locationId] = '';
         state.cache.customerAddresses = Object.assign(state.cache.customerAddresses, newObj)
 
-        let postalLocation = state.picker.postalLocations[index];
-        if (postalLocation)
-            postalLocation['fullAddress'] = `${postalLocation.custrecord_ap_lodgement_addr1} ${postalLocation.custrecord_ap_lodgement_addr2},` +
-                ` ${postalLocation.custrecord_ap_lodgement_suburb} ${postalLocation.custrecord_ap_lodgement_site_state} ${postalLocation.custrecord_ap_lodgement_postcode}`;
+        let location = state.picker.locationOptions[index];
+        if (location)
+            location['fullAddress'] = `${location.custrecord_ap_lodgement_addr1} ${location.custrecord_ap_lodgement_addr2},` +
+                ` ${location.custrecord_ap_lodgement_suburb} ${location.custrecord_ap_lodgement_site_state} ${location.custrecord_ap_lodgement_postcode}`;
 
-        return index >= 0 ? state.picker.postalLocations[index] : {};
+        return index >= 0 ? state.picker.locationOptions[index] : {};
     },
     selectedCustomerAddress : state => {
         if (!state.picker.customerAddressId) return {};
@@ -94,7 +76,7 @@ const getters = {
         if (typeId === 1) {
             try {
                 let address = JSON.parse(addressId);
-                return {...address, formatted: `${address.addr1} ${address.addr2}, ${address.city} ${address.state} ${address.zip} (${address.lat}, ${address.lng})`}
+                return {...address, formatted: `${address.addr1} ${address.addr2}, ${address.city} ${address.state} ${address.zip}`}
             } catch (e) { return addressId; }
         } else if (typeId === 2) {
 
@@ -109,14 +91,14 @@ const getters = {
 
         } else if (typeId === 3) {
 
-            if (!state.cache.postalLocations[addressId + '']) {
-                Vue.set(state.cache.postalLocations, addressId + '', {...defaultAddressObject});
+            if (!state.cache.locationOptions[addressId + '']) {
+                Vue.set(state.cache.locationOptions, addressId + '', {...defaultAddressObject});
                 state.cache.queue.push({typeId, addressId, customerId: addressData['custrecord_1288_customer']});
                 _attemptToStarCacheBuilder();
                 // _requestAddressDataFromSuitelet(state, typeId, addressId, addressData['custrecord_1288_customer']);
             }
 
-            return state.cache.postalLocations[addressId]
+            return state.cache.locationOptions[addressId]
         }
     }
 };
@@ -124,9 +106,9 @@ const getters = {
 const mutations = {
     resetPicker : state => {
         state.picker.customerAddressId = null;
-        state.picker.postalStateId = null;
-        state.picker.postalLocationId = null;
-        state.picker.postalLocationLoading = false;
+        state.picker.locationStateId = null;
+        state.picker.locationId = null;
+        state.picker.locationLoading = false;
         state.picker.manualForm = {...manualAddressFormDefault}
     },
     addDataToCache : (state, {typeId, addressId, customerId}) => {
@@ -135,8 +117,8 @@ const mutations = {
             if (index >= 0) Vue.set(state.cache.customerAddresses, addressId + '', _parseCustomerAddress(state.picker.customerAddresses[index]));
             else state.cache.queue.push({typeId, addressId, customerId});
         } else if (typeId === 3) {
-            let index = state.picker.postalLocations.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
-            if (index >= 0) Vue.set(state.cache.postalLocations, addressId + '', _parsePostalLocation(state.picker.postalLocations[index]));
+            let index = state.picker.locationOptions.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+            if (index >= 0) Vue.set(state.cache.locationOptions, addressId + '', _parseNCLocation(state.picker.locationOptions[index]));
             else state.cache.queue.push({typeId, addressId, customerId});
         }
     }
@@ -151,14 +133,19 @@ const actions = {
     setPickerAddressType : (context, typeId) => {
         context.state.picker.type = typeId;
     },
-    handlePostalStateChanged : async context => {
-        context.state.picker.postalLocationLoading = true;
+    handleLocationFilterChanged : async context => {
+        if (!context.state.picker.locationTypeId || !context.state.picker.locationStateId) return;
 
-        let data = await http.get('getPostalLocationOptions', { postalStateId: context.state.picker.postalStateId });
+        context.state.picker.locationLoading = true;
 
-        context.state.picker.postalLocations = Array.isArray(data) ? [...data] : [];
+        let data = await http.get('getLocationOptions', {
+            locationStateId: context.state.picker.locationStateId,
+            locationTypeId: context.state.picker.locationTypeId,
+        });
 
-        context.state.picker.postalLocationLoading = false;
+        context.state.picker.locationOptions = Array.isArray(data) ? [...data] : [];
+
+        context.state.picker.locationLoading = false;
     },
     cacheAddressData : async (context) => {
         if (context.state.cache.running) return;
@@ -179,13 +166,13 @@ const actions = {
                         context.state.cache.customerAddresses[addressId + ''] = _parseCustomerAddress(addressData)
                     }
                 } else if (typeId === 3) {
-                    let index = context.state.picker.postalLocations.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
+                    let index = context.state.picker.locationOptions.findIndex(item => parseInt(item.internalid) === parseInt(addressId));
 
                     if (index >= 0) {
-                        context.state.cache.postalLocations[addressId + ''] = _parsePostalLocation(context.state.picker.postalLocations[index]);
+                        context.state.cache.locationOptions[addressId + ''] = _parseNCLocation(context.state.picker.locationOptions[index]);
                     } else { // request from suitelet
-                        let addressData = await http.get('getPostalLocationById', {postalLocationId: addressId});
-                        context.state.cache.postalLocations[addressId + ''] = _parsePostalLocation(addressData)
+                        let addressData = await http.get('getLocationById', {locationId: addressId});
+                        context.state.cache.locationOptions[addressId + ''] = _parseNCLocation(addressData)
                     }
                 }
             } catch (e) {
@@ -212,7 +199,7 @@ function _attemptToStarCacheBuilder() {
 
 function _parseCustomerAddress(address) {
     return {
-        formatted: `${address.addr1} ${address.addr2}, ${address.city} ${address.state} ${address.zip} (${address.custrecord_address_lat}, ${address.custrecord_address_lon})`,
+        formatted: `${address.addr1} ${address.addr2}, ${address.city} ${address.state} ${address.zip}`,
         name: address['addressee'],
         addr1: address['addr1'],
         addr2: address['addr2'],
@@ -224,10 +211,9 @@ function _parseCustomerAddress(address) {
     }
 }
 
-function _parsePostalLocation(address) {
+function _parseNCLocation(address) {
     let formatted = `${address.name} (${address.custrecord_ap_lodgement_addr1} ${address.custrecord_ap_lodgement_addr2},` +
-        ` ${address.custrecord_ap_lodgement_suburb} ${address.custrecord_ap_lodgement_site_state} ${address.custrecord_ap_lodgement_postcode})` +
-        ` (${address.custrecord_ap_lodgement_lat}, ${address.custrecord_ap_lodgement_long})`
+        ` ${address.custrecord_ap_lodgement_suburb} ${address.custrecord_ap_lodgement_site_state} ${address.custrecord_ap_lodgement_postcode})`;
     return {
         formatted, name: address['name'],
         addr1: address['custrecord_ap_lodgement_addr1'],

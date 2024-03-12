@@ -16,7 +16,7 @@ const defaultTitle = VARS.pageTitle;
 const serviceStopColumns = Object.keys(VARS.serviceStopDefault);
 const addressFieldIds = VARS.addressFieldIds;
 const addressSublistFieldIds = VARS.addressSublistFieldIds;
-const postalLocationFieldIds = VARS.postalLocationFieldIds;
+const ncLocationFieldIds = VARS.ncLocationFieldIds;
 
 let NS_MODULES = {};
 
@@ -479,44 +479,34 @@ const getOperations = {
 
         _writeResponseJson(response, data);
     },
-    'getPostalLocationOptions' : function (response, {postalStateId}) {
+    'getLocationOptions' : function (response, {locationStateId, locationTypeId}) {
         let {search} = NS_MODULES;
         let data = [];
 
-        let NCLSearch = search.load({
+        let locationResults = search.create({
             type: 'customrecord_ap_lodgment_location',
-            id: 'customsearch_smc_noncust_location'
-        });
+            filters: [
+                ["custrecord_ap_lodgement_site_state", "is", locationStateId],
+                "AND",
+                ["custrecord_noncust_location_type", "is", locationTypeId]
+            ],
+            columns: [...ncLocationFieldIds],
+        }).run();
 
-        //NCL Type: AusPost(1), Toll(2), StarTrack(7)
-        NCLSearch.filters.push(search.createFilter({
-            name: 'custrecord_noncust_location_type',
-            operator: search.Operator.ANYOF,
-            values: [1, 2, 7]
-        }))
-
-        NCLSearch.filters.push(search.createFilter({
-            name: 'custrecord_ap_lodgement_site_state',
-            operator: search.Operator.IS,
-            values: postalStateId,
-        }))
-
-        let results = NCLSearch.run();
-
-        let temp = 0;
-        while (temp < 5) {
-            let subset = results.getRange({start: temp * 1000, end: temp * 1000 + 1000});
-            for (let postalLocation of subset) { // we can also use getAllValues() on one of these to see all available fields
+        let cycle = 0;
+        while (true) {
+            let subset = locationResults['getRange']({start: cycle * 1000, end: cycle * 1000 + 1000});
+            for (let location of subset) { // we can also use getAllValues() on one of these to see all available fields
                 let entry = {};
-                for (let fieldId of postalLocationFieldIds) {
+                for (let fieldId of ncLocationFieldIds) {
                     if (['custrecord_noncust_location_type', 'custrecord_ap_lodgement_site_state'].includes(fieldId)) {
-                        entry[fieldId] = postalLocation.getText({name: fieldId});
-                    } else entry[fieldId] = postalLocation.getValue({name: fieldId});
+                        entry[fieldId] = location.getText({name: fieldId});
+                    } else entry[fieldId] = location.getValue({name: fieldId});
                 }
                 data.push(entry);
             }
             if (subset.length < 1000) break;
-            temp++;
+            cycle++;
         }
 
         _writeResponseJson(response, data);
@@ -548,14 +538,18 @@ const getOperations = {
 
         _writeResponseJson(response, entry);
     },
-    'getPostalLocationById' : function (response, {postalLocationId}) {
-        let postalLocationRecord = NS_MODULES.record.load({type: 'customrecord_ap_lodgment_location', id: postalLocationId});
+    'getLocationById' : function (response, {locationId}) {
+        let locationRecord = NS_MODULES.record.load({type: 'customrecord_ap_lodgment_location', id: locationId});
+        let fieldsToGetText = [
+            'custrecord_noncust_location_type',
+            'custrecord_ap_lodgement_site_state',
+        ]
 
         let entry = {};
-        for (let fieldId of postalLocationFieldIds) {
-            if (['custrecord_noncust_location_type', 'custrecord_ap_lodgement_site_state'].includes(fieldId)) {
-                entry[fieldId] = postalLocationRecord.getText({fieldId});
-            } else entry[fieldId] = postalLocationRecord.getValue({fieldId});
+        for (let fieldId of ncLocationFieldIds) {
+            if (fieldsToGetText.includes(fieldId)) {
+                entry[fieldId] = locationRecord.getText({fieldId});
+            } else entry[fieldId] = locationRecord.getValue({fieldId});
         }
         _writeResponseJson(response, entry);
     },

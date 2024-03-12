@@ -59,11 +59,11 @@ export default {
             this.$store.commit('addresses/resetPicker');
             this.dialog = false;
         },
-        savePostalLocation() {
+        saveNCLocation() {
             if (!this.$refs.form.validate()) return false;
 
-            this.$store.commit('service-stops/saveAddress', {typeId: 3, data: this.picker.postalLocationId});
-            this.$store.commit('addresses/addDataToCache', {typeId: 3, addressId: this.picker.postalLocationId});
+            this.$store.commit('service-stops/saveAddress', {typeId: 3, data: this.picker.locationId});
+            this.$store.commit('addresses/addDataToCache', {typeId: 3, addressId: this.picker.locationId});
             this.$store.commit('addresses/resetPicker');
             this.dialog = false;
         },
@@ -82,7 +82,7 @@ export default {
         },
         displayText() {
             let addressType = parseInt(this.$store.getters['service-stops/formDialog'].form.custrecord_1288_address_type);
-            let tmp = ['Manually Entered: ', 'Address Book: ', 'Postal Location: ']
+            let tmp = ['Manually Entered: ', 'Address Book: ', 'Non-Customer Location: ']
             let str1 = tmp[addressType - 1]
             let str2 = this.$store.getters['addresses/getAddressObject'](addressType, this.$store.getters['service-stops/formDialog'].form).formatted
             return str2 ? str1 + str2 : '';
@@ -101,8 +101,8 @@ export default {
                 !!this.manualForm.state ||
                 !!this.manualForm.city || 'Please fill in this field using one of the address suggestions';
         },
-        selectedPostalLocation() {
-            return this.$store.getters['addresses/selectedPostalLocation'];
+        selectedLocation() {
+            return this.$store.getters['addresses/selectedLocation'];
         },
         selectedCustomerAddress() {
             return this.$store.getters['addresses/selectedCustomerAddress'];
@@ -138,7 +138,7 @@ export default {
                     <v-row>
                         <v-col cols="12">
                             <p v-if="panel !== undefined" class="text-h5 text-center grey--text">|||||||||||</p>
-                            <p v-else class="text-h5 text-center">Pick an address from...</p>
+                            <p v-else class="text-h5 text-center">Pick an address...</p>
                         </v-col>
                         <v-expansion-panels popout focusable v-model="panel">
 
@@ -147,7 +147,7 @@ export default {
                                     <template v-slot:default="{ open }">
                                         <v-slide-x-transition leave-absolute>
                                             <span v-if="open" key="0" class="subtitle-1 primary--text">Please select an address from the customer's address book</span>
-                                            <span v-else key="1" :class="panel !== 0 && panel !== undefined ? 'grey--text' : ''">...the customer's address book</span>
+                                            <span v-else key="1" :class="panel !== 0 && panel !== undefined ? 'grey--text' : ''">...from the customer's Address Book</span>
                                         </v-slide-x-transition>
                                     </template>
                                 </v-expansion-panel-header>
@@ -202,36 +202,42 @@ export default {
                                 <v-expansion-panel-header>
                                     <template v-slot:default="{ open }">
                                         <v-slide-x-transition leave-absolute>
-                                            <span v-if="open" key="0" class="subtitle-1 primary--text">Please specify a postal location</span>
-                                            <span v-else key="1" :class="panel !== 1 && panel !== undefined ? 'grey--text' : ''">...postal locations</span>
+                                            <span v-if="open" key="0" class="subtitle-1 primary--text">Please specify a location from the list</span>
+                                            <span v-else key="1" :class="panel !== 1 && panel !== undefined ? 'grey--text' : ''">...from list of Non-Customer Locations</span>
                                         </v-slide-x-transition>
                                     </template>
                                 </v-expansion-panel-header>
                                 <v-expansion-panel-content>
                                     <v-row class="mt-5">
                                         <v-col cols="6">
-                                            <v-autocomplete label="State" :disabled="picker.postalLocationLoading"
-                                                            v-model="picker.postalStateId"
-                                                            :items="picker.postalStates"
-                                                            @change="$store.dispatch('addresses/handlePostalStateChanged')"></v-autocomplete>
+                                            <v-autocomplete label="Location Type" :disabled="picker.locationLoading" dense
+                                                            v-model="picker.locationTypeId"
+                                                            :items="$store.getters['misc/nonCustomerLocationTypes']"
+                                                            @change="$store.dispatch('addresses/handleLocationFilterChanged')"></v-autocomplete>
                                         </v-col>
                                         <v-col cols="6">
-                                            <v-autocomplete label="Postal Location"
-                                                            :disabled="picker.postalLocationLoading || !picker.postalStateId"
-                                                            :loading="picker.postalLocationLoading"
-                                                            v-model="picker.postalLocationId"
-                                                            :items="picker.postalLocations"
+                                            <v-autocomplete label="State" :disabled="picker.locationLoading" dense
+                                                            v-model="picker.locationStateId"
+                                                            :items="$store.getters['misc/states']"
+                                                            @change="$store.dispatch('addresses/handleLocationFilterChanged')"></v-autocomplete>
+                                        </v-col>
+                                        <v-col cols="12">
+                                            <v-autocomplete label="Location List" dense
+                                                            :disabled="picker.locationLoading || !picker.locationStateId || !picker.locationTypeId"
+                                                            :loading="picker.locationLoading"
+                                                            v-model="picker.locationId"
+                                                            :items="picker.locationOptions"
                                                             :rules="[v => panel !== 1 || validate(v, 'required')]"
                                                             item-value="internalid" item-text="name"></v-autocomplete>
                                         </v-col>
                                         <v-col cols="12">
-                                            <v-text-field label="Full Address" v-model="selectedPostalLocation.fullAddress"
+                                            <v-text-field label="Full Address" v-model="selectedLocation.fullAddress"
                                                           dense disabled
                                                           :rules="[v => panel !== 1 || validate(v, 'required')]"
                                             ></v-text-field>
                                         </v-col>
                                         <v-col cols="6">
-                                            <v-text-field label="City" v-model="selectedPostalLocation.custrecord_ap_lodgement_suburb"
+                                            <v-text-field label="City" v-model="selectedLocation.custrecord_ap_lodgement_suburb"
                                                           dense disabled
                                                           :rules="[v => panel !== 1 || validate(v, 'required')]"
                                             ></v-text-field>
@@ -239,27 +245,27 @@ export default {
 
                                         <v-col cols="6">
                                             <v-text-field label="Postcode"
-                                                          v-model="selectedPostalLocation.custrecord_ap_lodgement_postcode"
+                                                          v-model="selectedLocation.custrecord_ap_lodgement_postcode"
                                                           dense disabled
                                                           :rules="[v => panel !== 1 || validate(v, 'required')]"
                                             ></v-text-field>
                                         </v-col>
 
                                         <v-col cols="6">
-                                            <v-text-field label="Lat" v-model="selectedPostalLocation.custrecord_ap_lodgement_lat"
+                                            <v-text-field label="Lat" v-model="selectedLocation.custrecord_ap_lodgement_lat"
                                                           dense disabled
                                                           :rules="[v => panel !== 1 || validate(v, 'required')]"
                                             ></v-text-field>
                                         </v-col>
 
                                         <v-col cols="6">
-                                            <v-text-field label="Lng" v-model="selectedPostalLocation.custrecord_ap_lodgement_long"
+                                            <v-text-field label="Lng" v-model="selectedLocation.custrecord_ap_lodgement_long"
                                                           dense disabled
                                                           :rules="[v => panel !== 1 || validate(v, 'required')]"
                                             ></v-text-field>
                                         </v-col>
                                         <v-col cols="12">
-                                            <v-btn block color="green" dark @click.stop="savePostalLocation">Use this postal location</v-btn>
+                                            <v-btn block color="green" dark @click.stop="saveNCLocation">Use this postal location</v-btn>
                                         </v-col>
                                     </v-row>
                                 </v-expansion-panel-content>
@@ -270,7 +276,7 @@ export default {
                                     <template v-slot:default="{ open }">
                                         <v-slide-x-transition leave-absolute>
                                             <span v-if="open" key="0" class="subtitle-1 primary--text">Please manually enter an address</span>
-                                            <span v-else key="1" :class="panel !== 2 && panel !== undefined ? 'grey--text' : ''">...or enter an address manually</span>
+                                            <span v-else key="1" :class="panel !== 2 && panel !== undefined ? 'grey--text' : ''">...or Enter An Address Manually</span>
                                         </v-slide-x-transition>
                                     </template>
                                 </v-expansion-panel-header>

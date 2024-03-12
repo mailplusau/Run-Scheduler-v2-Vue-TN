@@ -44,7 +44,7 @@ export const VARS = {
         custrecord_1288_sequence: 0,
         custrecord_1288_is_transfer: '2', // Yes (1), No (2)
         custrecord_1288_transfer_operator: null,
-        custrecord_1288_address_type: 1, // Manual (1), Book (2), Postal (3)
+        custrecord_1288_address_type: 1, // Manual (1), Book (2), Location (3)
         custrecord_1288_address_book: null,
         custrecord_1288_postal_location: null,
         custrecord_1288_manual_address: '',
@@ -54,7 +54,7 @@ export const VARS = {
     },
     addressFieldIds: ['addr1', 'addr2', 'city', 'state', 'zip', 'country', 'addressee', 'custrecord_address_lat', 'custrecord_address_lon', 'custrecord_address_ncl'],
     addressSublistFieldIds: ['internalid', 'label', 'defaultshipping', 'defaultbilling', 'isresidential'],
-    postalLocationFieldIds: [
+    ncLocationFieldIds: [
         'name',
         'internalid',
         'custrecord_ap_lodgement_addr1',

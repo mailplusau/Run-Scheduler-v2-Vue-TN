@@ -24,9 +24,9 @@ const SERVICE_STOP_SCHEMA = {
     transferOperatorId: Number,
 
     /** Addresses **/
-    addressType: Number || String, // Book (1), Postal (2), Manual (3)
+    addressType: Number || String, // Manual (1), Book (2), Location (3)
     addressBookId: Number,
-    postalLocationId: Number,
+    locationId: Number,
 
     address: {
         addr1: String,
@@ -241,7 +241,7 @@ const getters = {
             for (const [index, value] of daysOfWeek.entries()) {
                 if (value === '1') {
                     let [stopTime, stopDuration] = stopTimePerDay[index].split('|');
-                    let addressTypes = ['Manually Entered', 'Address Book', 'Postal Location']
+                    let addressTypes = ['Manually Entered', 'Address Book', 'Non-Customer Location']
 
                     let eventTime = new Date(format(addDays(new Date(), obj[index].day - today), "yyyy-MM-dd") + 'T' + stopTime);
                     obj[index].stops.push({
