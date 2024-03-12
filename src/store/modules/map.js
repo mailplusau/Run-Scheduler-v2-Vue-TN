@@ -103,7 +103,7 @@ const state = {
         dataLoading: false,
         selectedDays: [],
         territoryMarkings: {
-            show: true,
+            show: false,
             processing: false,
         }
     }
@@ -287,6 +287,7 @@ const actions = {
                 fillColor: "#ff5959",
                 fillOpacity: 0.1,
             });
+
             polygon.addListener('mouseover', () => {
                 _displayMessageOnMapCenter(`Territory: ${territoryName}`)
                 polygon['setOptions']({strokeOpacity: 0.1});
@@ -298,7 +299,6 @@ const actions = {
                 polygon['setOptions']({strokeOpacity: 0.2});
                 polygon['setOptions']({fillOpacity: 0.1});
             });
-            polygon['setMap'](googleMap);
 
             territories.push({
                 text: territoryName,
