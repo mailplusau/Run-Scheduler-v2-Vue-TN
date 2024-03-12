@@ -84,13 +84,12 @@ export default {
             <v-list-item>
                 <v-list-item-content>
                     <v-list-item-title>
-                        <v-icon color="primary" class="mr-2">mdi-cog-outline</v-icon>
-                        <b class="primary--text">Map Settings</b>
+
                     </v-list-item-title>
                 </v-list-item-content>
 
                 <v-list-item-action>
-                    <v-btn text small @click="drawer = !drawer" color="red"><v-icon>mdi-close</v-icon> close</v-btn>
+                    <v-btn text small @click="drawer = !drawer" color="red"><v-icon>mdi-close</v-icon> close panel</v-btn>
                 </v-list-item-action>
             </v-list-item>
 

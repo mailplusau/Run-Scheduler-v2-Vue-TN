@@ -370,13 +370,13 @@ function _displayWaypointInfo(context, stop) {
         <p class="my-1"><b>Notes:</b> ${stop.custrecord_1288_notes || 'None provided'}</p>
         <p class="my-1"><b>Address:</b> ${stop.addressObj.formatted}</p>
     `, maxWidth: 450, buttons: [
-            'spacer',
             {
                 action: 'map/goToEditServiceStop',
                 text: 'edit this stop',
                 color: 'primary',
                 params: {customerId: stop.custrecord_1288_customer, serviceId: stop.custrecord_1288_service}
             },
+            'spacer',
             {
                 text: 'okay',
                 color: 'green darken-1',
